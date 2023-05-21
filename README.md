@@ -13,9 +13,9 @@ Setup Instructions:
 
 -->you need to install the following python librarys:
    -->pygame
-   -->pymunk
-   -->tkinter
-   -->costumtkinter
+      ,pymunk
+      ,tkinter
+      ,costumtkinter
 
 ________________________________________________________________________________________
 
