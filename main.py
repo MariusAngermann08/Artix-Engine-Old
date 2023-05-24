@@ -52,7 +52,7 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 frame_counter = 0
 sec_gone = 0
 while True:
-	if sec_gone == 15:
+	if sec_gone == 5:
 		subprocess.Popen('cmd /c cd /d "{}" &'.format(script_dir), shell=True)
 		subprocess.Popen('python project_manager.py', shell=True)
 		pygame.quit()
@@ -66,6 +66,7 @@ while True:
 	if frame_counter == 60 * 0.7:
 		sec_gone += 1
 		frame_counter = 0
+	if frame_counter == 20 * 0.7:
 		if currentstateindex == 3:
 			currentstateindex = 0
 		else:

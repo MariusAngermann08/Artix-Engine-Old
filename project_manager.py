@@ -19,6 +19,7 @@ import pygame
 import sys
 import os
 import shutil
+import subprocess
 
 from ui_modules.ui_input import Input
 from ui_modules.ui_button import Button
@@ -92,7 +93,15 @@ class rendered_project:
 		else:
 			self.delete_hovered = False
 
-
+		if self.open_button.check_click():
+			opentemp = open("prcopen.info", "w")
+			opentemp.writelines(self.name)
+			opentemp.close()
+			script_dir = os.path.dirname(os.path.realpath(__file__))
+			subprocess.Popen('cmd /c cd /d "{}" &'.format(script_dir), shell=True)
+			subprocess.Popen('python Editor.py', shell=True)
+			pygame.quit()
+			sys.exit()
 
 		costume_scaled = pygame.transform.scale(costume, (600,170))
 		display_surface.blit(costume_scaled, self.position)
@@ -125,7 +134,7 @@ def initialize_projects():
 	opened = open('registered_projects.info', 'r')
 	read = opened.readlines()
 	for lines in read:
-		# Use rstrip() to remove the trailing newline character
+		# rstrip() to get rid of new line character
 		line = lines.rstrip()
 		if line != "":
 			projects_initialized.append(line)
