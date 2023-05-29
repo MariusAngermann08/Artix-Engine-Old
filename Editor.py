@@ -26,8 +26,8 @@ project_name = readfile[0]
 openfile.close()
 
 
-def import_file():
-	filename = filedialog.askopenfilename(initialdir=os.path.expanduser("~/Documents"), title="Import File", filetypes=(("png files","*.png"),("jpeg files","*.jpg")))
+
+
 
 
 
@@ -86,18 +86,162 @@ file_manager_label.pack()
 file_manager_label.place(relwidth=1,relheight=1)
 file_manager_label.lift()
 
+
+class FileManager:
+	def __init__(self):
+		self.displayed_files = []
+		self.files_list = []
+		self.FileLoader()
+
+	def FileLoader(self):
+		self.files_list.clear()
+		openfile = open("projects/"+project_name+"/files.txt", "r")
+		readfile = openfile.readlines()
+		for lines in readfile:
+			line = lines.rstrip("\n")
+			self.files_list.append(line)
+
+	def display_files(self):
+		currentindex = 0
+		self.displayed_files = []
+		lastbuttonpos = []
+		lastlabelpos = []
+		attempts = 0
+		numberinline = 0
+		newline = False
+		for lines in self.files_list:
+			testimg = ctk.CTkImage(dark_image=Image.open("src/icons/image_icon.png"),size=(50,60))
+			button = ctk.CTkButton(file_manager_frame, text="", image=testimg, width=50, height=60)
+			name_label = ctk.CTkLabel(file_manager_frame, text=lines, fg_color="transparent")
+			self.displayed_files.append(testimg)
+			self.displayed_files.append(button)
+			self.displayed_files.append(name_label)
+		for objects in self.displayed_files:
+			if currentindex == 3:
+				currentindex = 0
+				attempts += 1
+				numberinline += 1
+			if currentindex == 0:
+				if numberinline == 7:
+					numberinline = 0
+					attempts = 0
+					newline = True
+					lastbuttonpos = [10,lastbuttonpos[1]+100]
+					lastlabelpos = [2,lastlabelpos[1]+100]
+				currentindex += 1
+				continue
+			elif currentindex == 1:
+				objects.pack(padx=0,pady=30)
+				if attempts == 0:
+					if newline:
+						objects.place(x=lastbuttonpos[0],y=lastbuttonpos[1],relwidth=0.1,relheight=0.3)
+					else:
+						objects.place(x=10,y=40,relwidth=0.1,relheight=0.3)
+						lastbuttonpos = [10,40]
+				else:
+					objects.place(x=lastbuttonpos[0]+100,y=lastbuttonpos[1],relwidth=0.1,relheight=0.3)
+					lastbuttonpos = [lastbuttonpos[0]+100,lastbuttonpos[1]]
+			elif currentindex == 2:
+				objects.pack(padx=0,pady=30)
+				if attempts == 0:
+					if newline:
+						objects.place(x=lastlabelpos[0],y=lastlabelpos[1],relwidth=0.12,relheight=0.07)
+					else:
+						objects.place(x=2,y=110,relwidth=0.12,relheight=0.07)
+						lastlabelpos = [2,110]
+				else:
+					objects.place(x=lastlabelpos[0]+100,y=lastlabelpos[1],relwidth=0.12,relheight=0.07)
+					lastlabelpos = [lastlabelpos[0]+100,lastlabelpos[1]]
+			currentindex += 1
+	
+
+	def update(self):
+		currentindex = 0
+		for objects in self.displayed_files:
+			if currentindex == 3:
+				currentindex = 0
+			if currentindex == 0:
+				currentindex += 1
+				continue
+			objects.destroy()
+			currentindex += 1
+		self.displayed_files.clear()
+		self.FileLoader()
+		self.display_files()
+
+	def scroll(self,direction=""):
+		pass
+
+	
+
+fm = FileManager()
+fm.display_files()
+fm.update()
+fm.scroll("down")
+
+
+
+
+def import_file():
+	filename = filedialog.askopenfilename(initialdir=os.path.expanduser("~/Documents"), title="Import File", filetypes=(("png files","*.png"),("jpeg files","*.jpg")))
+	file_name = os.path.basename(filename)
+	if file_name != "":
+		with open("projects/"+project_name+"/files.txt", "r") as openfile:
+			readfile = openfile.readlines()
+			readfile.append(file_name.strip() + "\n")  
+		with open("projects/"+project_name+"/files.txt", "w") as openfile:
+			openfile.writelines(readfile)
+		fm.update()
+
+
+
+
+
 file_manager_button = ctk.CTkButton(file_manager_heading, text="Import", command=import_file)
 file_manager_button.pack()
 file_manager_button.place(relwidth=0.2,relheight=1)
 
-#filetest
-testimg = ctk.CTkImage(dark_image=Image.open("src/icons/image_icon.png"),size=(50,60))
-button = ctk.CTkButton(file_manager_frame, text="", image=testimg, width=50, height=60)
-button.pack()
-button.place(x=10,y=40,relwidth=0.1,relheight=0.3)
-name_label = ctk.CTkLabel(file_manager_frame, text="texture.png", fg_color="transparent")
-name_label.pack()
-name_label.place(x=2,y=110,relwidth=0.12,relheight=0.07)
+
+def AttributesWindow():
+	root = ctk.CTk()
+	root.geometry("800x600")
+	root.title("Attributes")
+	root.mainloop()
+
+def EventSystemWindow():
+	root = ctk.CTk()
+	root.geometry("800x600")
+	root.title("Event System")
+	root.mainloop()
+
+
+
+viewport = ctk.CTkCanvas(app,width=1100,height=630)
+viewport.pack()
+viewport.place(x=415,y=5)
+
+event_system_button = ctk.CTkButton(viewport,text="Event System",corner_radius=0, fg_color="#5f6670", font=("",20),command=EventSystemWindow)
+event_system_button.pack()
+event_system_button.place(x=0,y=0,relwidth=0.2,relheight=0.1)
+
+attributes_button = ctk.CTkButton(viewport,text="Attributes",corner_radius=0, fg_color="#5f6670", font=("",20),command=AttributesWindow)
+attributes_button.pack()
+attributes_button.place(x=150,y=0,relwidth=0.2,relheight=0.1)
+
+viewporttools = ctk.CTkSegmentedButton(viewport,values=["Move","Scale","Rotate"])
+viewporttools.pack()
+viewporttools.place(x=0,y=45)
+
+scenetreeframe = ctk.CTkFrame(app,width=265,height=420,border_width=0,fg_color="#666666")
+scenetreeframe.pack()
+scenetreeframe.place(x=2,y=10)
+
+scenetreeheading = ctk.CTkFrame(app,width=265,height=40,border_width=0,fg_color="#3d3d3d",corner_radius=0)
+scenetreeheading.pack()
+scenetreeheading.place(x=2,y=4)
+
+
+
 
 
 

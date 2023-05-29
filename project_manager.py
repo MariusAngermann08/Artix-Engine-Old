@@ -292,6 +292,10 @@ while True:
 			with open(file_path, 'w') as f:
 				f.write('never')
 
+			file_path = os.path.join(new_folder_path, "files.txt")
+			with open(file_path, 'w') as f:
+				f.write('')
+
 			loe = len(registered_projects_temp)
 			currentindex = 0
 			for elements in registered_projects_temp:
