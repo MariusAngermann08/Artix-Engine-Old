@@ -19,13 +19,14 @@ from tkinter import filedialog
 import os
 import customtkinter as ctk
 from PIL import Image
+import shutil
 
 openfile = open("prcopen.info", "r")
 readfile = openfile.readlines()
 project_name = readfile[0]
 openfile.close()
 
-
+scenes = {}
 
 
 
@@ -89,8 +90,11 @@ file_manager_label.lift()
 
 class FileManager:
 	def __init__(self):
+		self.menu = tk.Menu(app, tearoff=0)
+		self.menu.add_command(label="Delete", command=self.delete_file, font=("",15))
 		self.displayed_files = []
 		self.files_list = []
+		self.button_file_map = {}
 		self.FileLoader()
 
 	def FileLoader(self):
@@ -112,7 +116,9 @@ class FileManager:
 		for lines in self.files_list:
 			testimg = ctk.CTkImage(dark_image=Image.open("src/icons/image_icon.png"),size=(50,60))
 			button = ctk.CTkButton(file_manager_frame, text="", image=testimg, width=50, height=60)
+			button.bind("<Button-3>", self.open_menu)
 			name_label = ctk.CTkLabel(file_manager_frame, text=lines, fg_color="transparent")
+			self.button_file_map[button] = lines
 			self.displayed_files.append(testimg)
 			self.displayed_files.append(button)
 			self.displayed_files.append(name_label)
@@ -169,15 +175,51 @@ class FileManager:
 		self.FileLoader()
 		self.display_files()
 
-	def scroll(self,direction=""):
-		pass
+	def binddelete(self):
+		currentindex = 0
+		attempts = 0
+		for buttons in self.displayed_files:
+			if currentindex == 3:
+				currentindex = 0
+				attempts += 1
+			if currentindex == 0:
+				currentindex += 1
+				continue
+			if currentindex == 1:
+				currentindex += 1
+				continue
+			currentindex += 1
+	def delete_file(self, file_name):
+		print("deleted file "+file_name)
+		openfile = open("projects/"+project_name+"/files.txt", "r")
+		readfile = openfile.readlines()
+		openfile.close()
+		removed = []
+		for lines in readfile:
+			removed.append(lines.rstrip("\n"))
+		removed.remove(file_name)
+		writefile = open("projects/"+project_name+"/files.txt", "w")
+		for lines in removed:
+			if len(removed) > 1:
+				writefile.writelines(lines+"\n")
+			else:
+				writefile.writelines(lines)
+		writefile.close()
+		self.update()
+
+	def open_menu(self, event):
+		label = event.widget
+		button = label.master
+		file = self.button_file_map[button]
+		self.menu.entryconfig(0, command=lambda: self.delete_file(file))
+		self.menu.post(event.x_root, event.y_root)
 
 	
 
 fm = FileManager()
 fm.display_files()
 fm.update()
-fm.scroll("down")
+
 
 
 
@@ -240,9 +282,13 @@ scenetreeheading = ctk.CTkFrame(app,width=265,height=40,border_width=0,fg_color=
 scenetreeheading.pack()
 scenetreeheading.place(x=2,y=4)
 
+scenenamelabel = ctk.CTkLabel(scenetreeheading,text="DefaultScene",font=("",20))
+scenenamelabel.pack()
+scenenamelabel.place(x=0,y=0,relheight=1,relwidth=1)
 
-
-
+scenetreecanvas = ctk.CTkCanvas(scenetreeframe,bg="#666666")
+scenetreecanvas.pack()
+scenetreecanvas.place(x=0,y=0,relwidth=1,relheight=1)
 
 
 
