@@ -72,7 +72,7 @@ while True:
 		else:
 			currentstateindex += 1
 
-	loadinglabel = textfont.render(loading_states[currentstateindex],1,(255,255,255))
+	loadinglabel = textfont.render(loading_states[currentstateindex],1,(0, 99, 153))
 
 	screen.fill((0,0,0))
 	screen.blit(image_render, (0,0))

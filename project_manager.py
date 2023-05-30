@@ -34,6 +34,10 @@ pygame.init()
 
 flag = pygame.NOFRAME
 
+icon = pygame.image.load("src/icon.png")
+
+pygame.display.set_icon(icon)
+
 screen = pygame.display.set_mode((1000,700),flag)
 
 clock = pygame.time.Clock()
@@ -118,7 +122,7 @@ class rendered_project:
 
 def add_prc_to_render(last_pos):
 	for prcs in projects_initialized:
-		openfile = open('projects/'+prcs+'/project.artisan', 'r')
+		openfile = open('projects/'+prcs+'/project.artix', 'r')
 		readfile = openfile.readlines()
 		rendered_projects.append(rendered_project(prcs,str(readfile[0]),last_pos))
 		last_pos = [10,last_pos[1]+200]
@@ -128,7 +132,7 @@ headbar = pygame.image.load("src/colored_shapes/headbar.png")
 headbar_render = pygame.transform.scale(headbar, (1000,50))
 
 title_font = pygame.font.SysFont(None,30)
-window_title = title_font.render("Artisan Project Manager",True,(255,255,255))
+window_title = title_font.render("Artix Project Manager",True,(255,255,255))
 
 def initialize_projects():
 	opened = open('registered_projects.info', 'r')
@@ -288,7 +292,7 @@ while True:
 			projects_path = os.path.join(current_dir, "projects")
 			new_folder_path = os.path.join(projects_path, final)
 			os.mkdir(new_folder_path)
-			file_path = os.path.join(new_folder_path, "project.artisan")
+			file_path = os.path.join(new_folder_path, "project.artix")
 			with open(file_path, 'w') as f:
 				f.write('never')
 

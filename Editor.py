@@ -41,7 +41,9 @@ ctk.set_widget_scaling(1.5)
 app = ctk.CTk()
 app.geometry("1920x1080")
 app.after(0, lambda:app.state('zoomed'))
-app.title("Artisan Studio - Project:>" + project_name)
+app.title("Artix Engine - Project:>" + project_name)
+app.iconbitmap("src/icon.ico")
+
 
 #adding a menubar
 menu_font = ("Arial", 12)
@@ -74,7 +76,7 @@ selection_menu.add_command(label="Select all")
 selection_menu.add_command(label="Clear Selection")
 
 #Creating the file Manager
-file_manager_frame = ctk.CTkFrame(app,750,230,border_width=0,fg_color="#172a38",border_color="#000000")
+file_manager_frame = ctk.CTkFrame(app,750,230,fg_color="#172a38",border_color="#000000")
 file_manager_frame.pack()
 file_manager_frame.place(x=270,y=430)
 
@@ -248,12 +250,14 @@ def AttributesWindow():
 	root = ctk.CTk()
 	root.geometry("800x600")
 	root.title("Attributes")
+	root.iconbitmap("src/icon.ico")
 	root.mainloop()
 
 def EventSystemWindow():
 	root = ctk.CTk()
 	root.geometry("800x600")
 	root.title("Event System")
+	root.iconbitmap("src/icon.ico")
 	root.mainloop()
 
 
