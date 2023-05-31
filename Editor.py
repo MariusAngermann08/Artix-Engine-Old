@@ -20,13 +20,16 @@ import os
 import customtkinter as ctk
 from PIL import Image
 import shutil
+import subprocess
+import sys
 
 openfile = open("prcopen.info", "r")
 readfile = openfile.readlines()
 project_name = readfile[0]
 openfile.close()
 
-scenes = {}
+scenes = []
+
 
 
 
@@ -44,6 +47,13 @@ app.after(0, lambda:app.state('zoomed'))
 app.title("Artix Engine - Project:>" + project_name)
 app.iconbitmap("src/icon.ico")
 
+def openprcmanager():
+	script_dir = os.path.dirname(os.path.realpath(__file__))
+	subprocess.Popen('cmd /c cd /d "{}" &'.format(script_dir), shell=True)
+	subprocess.Popen('python project_manager.py', shell=True)
+	sys.exit()
+
+
 
 #adding a menubar
 menu_font = ("Arial", 12)
@@ -58,6 +68,7 @@ file_menu.add_command(label="Save")
 file_menu.add_command(label="Save as")
 file_menu.add_command(label="Project Settings")
 file_menu.add_separator()
+file_menu.add_command(label="Project Manager", command=openprcmanager)
 file_menu.add_command(label="Quit", command=app.quit)
 
 #adding a edit menu into menubar
@@ -246,6 +257,8 @@ file_manager_button.pack()
 file_manager_button.place(relwidth=0.2,relheight=1)
 
 
+
+
 def AttributesWindow():
 	root = ctk.CTk()
 	root.geometry("800x600")
@@ -288,11 +301,102 @@ scenetreeheading.place(x=2,y=4)
 
 scenenamelabel = ctk.CTkLabel(scenetreeheading,text="DefaultScene",font=("",20))
 scenenamelabel.pack()
-scenenamelabel.place(x=0,y=0,relheight=1,relwidth=1)
+scenenamelabel.place(x=20,y=0,relheight=1,relwidth=1)
 
-scenetreecanvas = ctk.CTkCanvas(scenetreeframe,bg="#666666")
+scenetreecanvas = ctk.CTkCanvas(scenetreeframe,bg="#666666",scrollregion=(0, 0, 500, 1000))
 scenetreecanvas.pack()
 scenetreecanvas.place(x=0,y=0,relwidth=1,relheight=1)
+
+hbar = ctk.CTkScrollbar(scenetreeframe,button_color="#a3a3a3")
+hbar.pack()
+hbar.place(x=250,y=30,relheight=0.93)
+
+
+scenetreecanvas.configure(yscrollcommand=hbar.set)
+hbar.configure(command=scenetreecanvas.yview)
+
+
+addbutton = ctk.CTkButton(scenetreeheading, text="+", fg_color="#5f9467", font=("",20))
+addbutton.pack()
+addbutton.place(x=5,y=5,relwidth=0.2,relheight=0.7)
+
+
+class SceneTree:
+	def __init__(self,link=[]):
+		self.sceneslink = link
+		self.currentscene = []
+		self.displayed_objects = []
+	def load_scene(self,name=""):
+		search=0
+		currentscene = name
+		for each in self.sceneslink:
+			if each.name == name:
+				search = self.sceneslink.index(each)
+				break
+		scenenamelabel.configure(text=self.sceneslink[search].name)
+		currentindex = 0
+		lastpos = [25,50]
+		for each in self.sceneslink[search].objects:
+			if each.type == "Camera2D":
+				button = ctk.CTkButton(scenetreecanvas, text=each.type, font=("",15), fg_color="#252626")
+			else:
+				button = ctk.CTkButton(scenetreecanvas, text=each.name, font=("",15), fg_color="#252626")
+			button.pack()
+			self.displayed_objects.append(button)
+			if currentindex == 0:
+				button.place(x=lastpos[0],y=lastpos[1],relwidth=0.8,relheight=0.1)
+			else:
+				button.place(x=lastpos[0],y=lastpos[1]+60,relwidth=0.8,relheight=0.1)
+			if currentindex != 0:
+				lastpos = [lastpos[0],lastpos[1]+60]
+			currentindex += 1
+
+
+	def update(self):
+		self.sceneslink = scenes
+		for objects in self.displayed_objects:
+			objects.destroy()
+		self.displayed_objects.clear()
+		self.load_scene(self.currentscene)
+
+		
+
+scenetree = SceneTree(link=scenes)
+
+
+class Scene:
+	def __init__(self,name="untitled",link=[]):
+		self.name = name
+		self.link = link
+		self.objects = []
+		camera = self.Camera2D()
+		self.objects.append(camera)
+	def add_object(self, type="", name=""):
+		if type == "Sprite2D":
+			self.objects.append(self.Sprite2D(name=name))
+		scenetree.update()
+	class Camera2D:
+		def __init__(self):
+			self.pos = [0,0]
+			self.type = "Camera2D"
+	class Sprite2D:
+		def __init__(self, name="Untitled"):
+			self.name = name
+			self.type = "" 
+
+
+
+defaultscene = Scene("Example Scene", link=scenes)
+scenes.append(defaultscene)
+
+scenetree.load_scene("Example Scene")
+
+defaultscene.add_object(type="Sprite2D", name="testobj")
+defaultscene.add_object(type="Sprite2D", name="coll")
+defaultscene.add_object(type="Sprite2D", name="bird")
+defaultscene.add_object(type="Sprite2D", name="obj1")
+defaultscene.add_object(type="Sprite2D", name="3dModel")
+defaultscene.add_object(type="Sprite2D", name="another one")
 
 
 
