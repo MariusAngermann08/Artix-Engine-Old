@@ -326,8 +326,8 @@ class SceneTree:
 		self.sceneslink = link
 		self.currentscene = []
 		self.displayed_objects = []
-	def load_scene(self,name=""):
-		search=0
+	def load_scene(self, name=""):
+		search = 0
 		currentscene = name
 		for each in self.sceneslink:
 			if each.name == name:
@@ -335,21 +335,31 @@ class SceneTree:
 				break
 		scenenamelabel.configure(text=self.sceneslink[search].name)
 		currentindex = 0
-		lastpos = [25,50]
+		lastpos = [25, 70]
 		for each in self.sceneslink[search].objects:
 			if each.type == "Camera2D":
-				button = ctk.CTkButton(scenetreecanvas, text=each.type, font=("",15), fg_color="#252626")
+				button = ctk.CTkButton(scenetreecanvas, text=each.type, font=("", 15), fg_color="#252626")
 			else:
-				button = ctk.CTkButton(scenetreecanvas, text=each.name, font=("",15), fg_color="#252626")
-			button.pack()
+				button = ctk.CTkButton(scenetreecanvas, text=each.name, font=("", 15), fg_color="#252626")
+
 			self.displayed_objects.append(button)
+
 			if currentindex == 0:
-				button.place(x=lastpos[0],y=lastpos[1],relwidth=0.8,relheight=0.1)
+				button_width = int(scenetreecanvas.winfo_width() * 0.8)
+				button_height = int(scenetreecanvas.winfo_height() * 0.1)
+				button_window = scenetreecanvas.create_window(lastpos[0], lastpos[1], anchor="nw", width=button_width, height=button_height, window=button)
 			else:
-				button.place(x=lastpos[0],y=lastpos[1]+60,relwidth=0.8,relheight=0.1)
+				button_width = int(scenetreecanvas.winfo_width() * 0.8)
+				button_height = int(scenetreecanvas.winfo_height() * 0.1)
+				button_window = scenetreecanvas.create_window(lastpos[0], lastpos[1] + 80, anchor="nw", width=button_width, height=button_height, window=button)
 			if currentindex != 0:
-				lastpos = [lastpos[0],lastpos[1]+60]
+				lastpos = [lastpos[0], lastpos[1] + 80]
 			currentindex += 1
+		canvas_width = scenetreecanvas.winfo_width()
+		canvas_height = lastpos[1] + 60
+		scenetreecanvas.configure(scrollregion=(0, 0, canvas_width, canvas_height))
+
+
 
 
 	def update(self):
@@ -397,6 +407,8 @@ defaultscene.add_object(type="Sprite2D", name="bird")
 defaultscene.add_object(type="Sprite2D", name="obj1")
 defaultscene.add_object(type="Sprite2D", name="3dModel")
 defaultscene.add_object(type="Sprite2D", name="another one")
+defaultscene.add_object(type="Sprite2D", name="3dCow")
+defaultscene.add_object(type="Sprite2D", name="another")
 
 
 
