@@ -316,18 +316,27 @@ scenetreecanvas.configure(yscrollcommand=hbar.set)
 hbar.configure(command=scenetreecanvas.yview)
 
 
-addbutton = ctk.CTkButton(scenetreeheading, text="+", fg_color="#5f9467", font=("",20))
-addbutton.pack()
-addbutton.place(x=5,y=5,relwidth=0.2,relheight=0.7)
 
 
 class SceneTree:
 	def __init__(self,link=[]):
+		self.menu = tk.Menu(app, tearoff=0)
+		self.menu.add_command(label="Delete", command=self.delete_object, font=("",15))
+		self.button_file_map = {}
+
 		self.sceneslink = link
-		self.currentscene = []
+		self.currentscene = ""
 		self.displayed_objects = []
+		self.registeredscenes = []
+		openfile = open("projects/"+project_name+"/scenes.txt", "r")
+		readfile = openfile.readlines()
+		openfile.close()
+		for lines in readfile:
+			self.registeredscenes.append(lines.rstrip("\n"))
+
 	def load_scene(self, name=""):
 		search = 0
+		self.currentscene = name
 		currentscene = name
 		for each in self.sceneslink:
 			if each.name == name:
@@ -342,7 +351,11 @@ class SceneTree:
 			else:
 				button = ctk.CTkButton(scenetreecanvas, text=each.name, font=("", 15), fg_color="#252626")
 
+			if each.type != "Camera2D":
+				button.bind("<Button-3>", self.open_menu)
+				self.button_file_map[button] = each.name
 			self.displayed_objects.append(button)
+			
 
 			if currentindex == 0:
 				button_width = int(scenetreecanvas.winfo_width() * 0.8)
@@ -369,7 +382,33 @@ class SceneTree:
 		self.displayed_objects.clear()
 		self.load_scene(self.currentscene)
 
-		
+	def delete_object(self, objectname=""): #objectname is for example player\n
+		for scenes in self.sceneslink:
+			if scenes.name == self.currentscene:
+				for objs in scenes.objects:
+					if objs.type != "Camera2D":
+						if objs.name == objectname:
+							scenes.objects.remove(objs)
+							break
+
+		openfile = open("projects/"+project_name+"/Scenes/"+self.currentscene+".txt", "r")
+		readfile = openfile.readlines()
+		openfile.close()
+		readfile.remove(objectname)
+		writefile = open("projects/"+project_name+"/Scenes/"+self.currentscene+".txt", "w")
+		for lines in readfile:
+			writefile.writelines(lines)
+		self.update()
+			
+
+	def open_menu(self, event):
+		label = event.widget
+		button = label.master
+		objects = self.button_file_map[button]
+		self.menu.entryconfig(0, command=lambda: self.delete_object(objects))
+		self.menu.post(event.x_root, event.y_root)
+
+	
 
 scenetree = SceneTree(link=scenes)
 
@@ -395,20 +434,61 @@ class Scene:
 			self.type = "" 
 
 
+def add_sprite():
+	dialog = ctk.CTkInputDialog(text="Sprite Name:", title="Create Sprite")
+	value = dialog.get_input()
+	currentindex = 0
+	for i in scenes:
+		if scenetree.currentscene == i.name:
+			break
+		currentindex += 1
+	if value != "":
+		scenes[currentindex].add_object(type="Sprite2D",name=value)
+		openfile = open("projects/"+project_name+"/Scenes/"+scenes[currentindex].name+".txt", "r")
+		readfile = openfile.readlines()
+		openfile.close()
+		objectstemp = []
+		for objs in readfile:
+			objectstemp.append(objs.rstrip("\n"))
+		objectstemp.append(value)
+		writefile = open("projects/"+project_name+"/Scenes/"+scenes[currentindex].name+".txt", "w")
+		for i in objectstemp:
+			writefile.writelines(i+"\n")
 
-defaultscene = Scene("Example Scene", link=scenes)
-scenes.append(defaultscene)
 
-scenetree.load_scene("Example Scene")
 
-defaultscene.add_object(type="Sprite2D", name="testobj")
-defaultscene.add_object(type="Sprite2D", name="coll")
-defaultscene.add_object(type="Sprite2D", name="bird")
-defaultscene.add_object(type="Sprite2D", name="obj1")
-defaultscene.add_object(type="Sprite2D", name="3dModel")
-defaultscene.add_object(type="Sprite2D", name="another one")
-defaultscene.add_object(type="Sprite2D", name="3dCow")
-defaultscene.add_object(type="Sprite2D", name="another")
+def add_menu(event):
+	addmenu.post(addbutton.winfo_rootx(), addbutton.winfo_rooty() + addbutton.winfo_height())
+
+addbutton = ctk.CTkButton(scenetreeheading, text="+", fg_color="#5f9467", font=("",20))
+addbutton.pack()
+addbutton.place(x=5,y=5,relwidth=0.2,relheight=0.7)
+
+addmenu = tk.Menu(app, tearoff=0)
+addmenu.add_command(label="Sprite",font=("",15),command=add_sprite)
+
+addbutton.bind("<Button-1>", add_menu)
+
+
+currentindex = 0
+for i in scenetree.registeredscenes:
+	scenetemp = Scene(i,link=scenes)
+	scenes.append(scenetemp)
+	openfile = open("projects/"+project_name+"/Scenes/"+i+".txt", "r")
+	readfile = openfile.readlines()
+	openfile.close()
+	objectsreg = []
+	for objs in readfile:
+		scenes[currentindex].objects.append(scenetemp.Sprite2D(objs))
+	currentindex += 1
+
+
+scenetree.load_scene(scenetree.registeredscenes[0])
+
+
+
+
+
 
 
 
