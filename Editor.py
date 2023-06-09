@@ -494,6 +494,26 @@ addmenu.add_command(label="Sprite",font=("",15),command=add_sprite)
 
 addbutton.bind("<Button-1>", add_menu)
 
+properties_panel_frame = ctk.CTkFrame(app,width=255,height=655,border_width=0,fg_color="#666666",corner_radius=0)
+properties_panel_frame.pack()
+properties_panel_frame.place(x=1022,y=4)
+
+properties_panel_heading = ctk.CTkFrame(app,width=255,height=40,border_width=0,fg_color="#3d3d3d",corner_radius=0)
+properties_panel_heading.pack()
+properties_panel_heading.place(x=1022,y=4)
+
+properties_panel_canvas = ctk.CTkCanvas(properties_panel_frame,bg="#666666")
+properties_panel_canvas.pack()
+properties_panel_canvas.place(x=0,y=0,relwidth=1,relheight=1)
+
+properties_panel_label = ctk.CTkLabel(properties_panel_heading,text="Properties",font=("",20))
+properties_panel_label.pack()
+properties_panel_label.place(relwidth=1,relheight=1)
+
+
+
+
+
 
 
 
