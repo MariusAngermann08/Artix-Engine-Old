@@ -15,6 +15,7 @@ Requirements:
 
 ->customtkinter
 
+
 All librarys can be installed via pip with this command:
 
 ->*pip install pymunk pygame customtkinter*
@@ -29,7 +30,9 @@ How to run the Engine:
 
 *I recommend to always start by running main.py to not encounter any errors*
 
+
 -run *project_manager.py* to directly start the project manager
+
 
 -when *Editor.py* the editor will start with the last project you opened
 

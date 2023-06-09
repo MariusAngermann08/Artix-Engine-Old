@@ -117,6 +117,7 @@ class FileManager:
 		self.files_list.clear()
 		openfile = open("projects/"+project_name+"/files.txt", "r")
 		readfile = openfile.readlines()
+		openfile.close()
 		for lines in readfile:
 			line = lines.rstrip("\n")
 			self.files_list.append(line)
@@ -276,24 +277,6 @@ def EventSystemWindow():
 	root.iconbitmap("src/icon.ico")
 	root.mainloop()
 
-
-
-viewport = ctk.CTkCanvas(app,width=1100,height=630)
-viewport.pack()
-viewport.place(x=415,y=5)
-
-event_system_button = ctk.CTkButton(viewport,text="Event System",corner_radius=0, fg_color="#5f6670", font=("",20),command=EventSystemWindow)
-event_system_button.pack()
-event_system_button.place(x=0,y=0,relwidth=0.2,relheight=0.1)
-
-attributes_button = ctk.CTkButton(viewport,text="Attributes",corner_radius=0, fg_color="#5f6670", font=("",20),command=AttributesWindow)
-attributes_button.pack()
-attributes_button.place(x=150,y=0,relwidth=0.2,relheight=0.1)
-
-viewporttools = ctk.CTkSegmentedButton(viewport,values=["Move","Scale","Rotate"])
-viewporttools.pack()
-viewporttools.place(x=0,y=45)
-
 scenetreeframe = ctk.CTkFrame(app,width=265,height=420,border_width=0,fg_color="#666666")
 scenetreeframe.pack()
 scenetreeframe.place(x=2,y=10)
@@ -318,14 +301,34 @@ hbar.place(x=250,y=30,relheight=0.93)
 scenetreecanvas.configure(yscrollcommand=hbar.set)
 hbar.configure(command=scenetreecanvas.yview)
 
+def general_update(preset="startup"):
+	scenes.clear()
+	print("general")
+	currentindex = 0
+	for i in scenetree.registeredscenes:
+		scenetemp = Scene(i,link=scenes)
+		scenes.append(scenetemp)
+		openfile = open("projects/"+project_name+"/Scenes/"+i+".txt", "r")
+		print("opened " + "projects/"+project_name+"/Scenes/"+i+".txt")
+		readfile = openfile.readlines()
+		print(readfile)
+		openfile.close()
+		for objs in readfile:
+			scenes[currentindex].objects.append(scenetemp.Sprite2D(objs))
+		currentindex += 1
+	if preset == "startup":
+		scenetree.load_scene(scenetree.registeredscenes[0])
+	else:
+		scenetree.load_scene(scenetree.currentscene)
 
-
+	print(scenes[0].objects)
 
 class SceneTree:
-	def __init__(self,link=[]):
+	def __init__(self,link=[],general_update=[]):
 		self.menu = tk.Menu(app, tearoff=0)
 		self.menu.add_command(label="Delete", command=self.delete_object, font=("",15))
 		self.button_file_map = {}
+		self.general_update = general_update
 
 		self.sceneslink = link
 		self.currentscene = ""
@@ -344,19 +347,24 @@ class SceneTree:
 		for each in self.sceneslink:
 			if each.name == name:
 				search = self.sceneslink.index(each)
+				self.currentsceneindex = search
 				break
 		scenenamelabel.configure(text=self.sceneslink[search].name)
 		currentindex = 0
 		lastpos = [25, 70]
 		for each in self.sceneslink[search].objects:
+			temp = []
+			if each.type != "Camera2D":
+				temp.append(each.name)
+				var = temp[0].rstrip("\n")
 			if each.type == "Camera2D":
 				button = ctk.CTkButton(scenetreecanvas, text=each.type, font=("", 15), fg_color="#252626")
 			else:
-				button = ctk.CTkButton(scenetreecanvas, text=each.name, font=("", 15), fg_color="#252626")
+				button = ctk.CTkButton(scenetreecanvas, text=var, font=("", 15), fg_color="#252626")
 
 			if each.type != "Camera2D":
 				button.bind("<Button-3>", self.open_menu)
-				self.button_file_map[button] = each.name
+				self.button_file_map[button] = var
 			self.displayed_objects.append(button)
 			
 
@@ -379,30 +387,41 @@ class SceneTree:
 
 
 	def update(self):
-		self.sceneslink = scenes
+		print("updated")
 		for objects in self.displayed_objects:
 			objects.destroy()
+			print("destroyed")
 		self.displayed_objects.clear()
 		self.load_scene(self.currentscene)
+		
+		
 
 	def delete_object(self, objectname=""): #objectname is for example player\n
 		for scenes in self.sceneslink:
+			print("another")
 			if scenes.name == self.currentscene:
 				for objs in scenes.objects:
 					if objs.type != "Camera2D":
-						if objs.name == objectname:
+						if objs.name == objectname or objs.name == objectname+"\n":
+							print(objs.name)
+							print("removed")
 							scenes.objects.remove(objs)
 							break
 
 		openfile = open("projects/"+project_name+"/Scenes/"+self.currentscene+".txt", "r")
 		readfile = openfile.readlines()
 		openfile.close()
-		readfile.remove(objectname)
+		exlist = []
+		exlist.append(objectname)
+		readfile.remove(exlist[0].rstrip("\n")+"\n")
+
 		writefile = open("projects/"+project_name+"/Scenes/"+self.currentscene+".txt", "w")
 		for lines in readfile:
 			writefile.writelines(lines)
+		writefile.close()
 		self.update()
-			
+		
+
 
 	def open_menu(self, event):
 		label = event.widget
@@ -413,7 +432,7 @@ class SceneTree:
 
 	
 
-scenetree = SceneTree(link=scenes)
+scenetree = SceneTree(link=scenes,general_update=general_update)
 
 
 class Scene:
@@ -446,7 +465,6 @@ def add_sprite():
 			break
 		currentindex += 1
 	if value != "":
-		scenes[currentindex].add_object(type="Sprite2D",name=value)
 		openfile = open("projects/"+project_name+"/Scenes/"+scenes[currentindex].name+".txt", "r")
 		readfile = openfile.readlines()
 		openfile.close()
@@ -457,6 +475,10 @@ def add_sprite():
 		writefile = open("projects/"+project_name+"/Scenes/"+scenes[currentindex].name+".txt", "w")
 		for i in objectstemp:
 			writefile.writelines(i+"\n")
+		scenes[scenetree.currentsceneindex].objects.append(Scene.Sprite2D(value))
+	scenetree.update()
+
+
 
 
 
@@ -473,30 +495,35 @@ addmenu.add_command(label="Sprite",font=("",15),command=add_sprite)
 addbutton.bind("<Button-1>", add_menu)
 
 
-currentindex = 0
-for i in scenetree.registeredscenes:
-	scenetemp = Scene(i,link=scenes)
-	scenes.append(scenetemp)
-	openfile = open("projects/"+project_name+"/Scenes/"+i+".txt", "r")
-	readfile = openfile.readlines()
-	openfile.close()
-	objectsreg = []
-	for objs in readfile:
-		scenes[currentindex].objects.append(scenetemp.Sprite2D(objs))
-	currentindex += 1
 
 
-scenetree.load_scene(scenetree.registeredscenes[0])
+viewport = ctk.CTkCanvas(app,width=1100,height=630)
+viewport.pack()
+viewport.place(x=415,y=5)
+
+event_system_button = ctk.CTkButton(viewport,text="Event System",corner_radius=0, fg_color="#5f6670", font=("",20),command=EventSystemWindow)
+event_system_button.pack()
+event_system_button.place(x=0,y=0,relwidth=0.2,relheight=0.1)
+
+attributes_button = ctk.CTkButton(viewport,text="Attributes",corner_radius=0, fg_color="#5f6670", font=("",20),command=AttributesWindow)
+attributes_button.pack()
+attributes_button.place(x=150,y=0,relwidth=0.2,relheight=0.1)
+
+viewporttools = ctk.CTkSegmentedButton(viewport,values=["Move","Scale","Rotate"])
+viewporttools.pack()
+viewporttools.place(x=0,y=45)
+
+
+class Viewport:
+	def __init__(self):
+		pass
 
 
 
 
 
 
-
-
-
-
+general_update("startup")
 
 
 app.mainloop()
