@@ -28,6 +28,9 @@ readfile = openfile.readlines()
 project_name = readfile[0]
 openfile.close()
 
+if project_name == "":
+	sys.exit()
+
 scenes = []
 
 
