@@ -360,10 +360,10 @@ class SceneTree:
 				var = temp[0].rstrip("\n")
 			if each.type == "Camera2D":
 				button = ctk.CTkButton(scenetreecanvas, text="Camera2D", font=("", 15), fg_color="#252626")
-				button.configure(command=lambda button=button: self.select(button))
+				button.configure(command=lambda button=button: self.select(button, "Camera2D"))
 			else:
 				button = ctk.CTkButton(scenetreecanvas, text=each.name.rstrip("\n"), font=("", 15), fg_color="#252626")
-				button.configure(command=lambda button=button: self.select(button))
+				button.configure(command=lambda button=button: self.select(button, each.name.rstrip("\n")))
 
 
 			
@@ -371,7 +371,7 @@ class SceneTree:
 				button.bind("<Button-3>", self.open_menu)
 				self.button_file_map[button] = var
 			self.displayed_objects.append(button)
-			
+
 
 			if currentindex == 0:
 				button_width = int(scenetreecanvas.winfo_width() * 0.8)
@@ -388,9 +388,13 @@ class SceneTree:
 		canvas_height = lastpos[1] + 60
 		scenetreecanvas.configure(scrollregion=(0, 0, canvas_width, canvas_height))
 
-	def select(self, object1=None):
+	def select(self, object1=None, name="empty"):
 		if self.selected_object is not None:
-			self.selected_object.configure(fg_color="#252626")
+			try:	
+				self.selected_object.configure(fg_color="#252626")
+			except:
+				#happens when new object is created or existing deleted (I dont know why)
+				pass
 		object1.configure(fg_color="#a1a1a1")
 		self.selected_object = object1
 
@@ -409,6 +413,7 @@ class SceneTree:
 			print("destroyed")
 		self.displayed_objects.clear()
 		self.load_scene(self.currentscene)
+		self.select(self.displayed_objects[len(self.displayed_objects)-1])
 		
 		
 
