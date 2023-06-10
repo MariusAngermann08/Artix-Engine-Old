@@ -329,7 +329,8 @@ class SceneTree:
 		self.menu.add_command(label="Delete", command=self.delete_object, font=("",15))
 		self.button_file_map = {}
 		self.general_update = general_update
-
+		self.currentselected = "Camera2D"
+		self.selected_object = None
 		self.sceneslink = link
 		self.currentscene = ""
 		self.displayed_objects = []
@@ -358,10 +359,14 @@ class SceneTree:
 				temp.append(each.name)
 				var = temp[0].rstrip("\n")
 			if each.type == "Camera2D":
-				button = ctk.CTkButton(scenetreecanvas, text=each.type, font=("", 15), fg_color="#252626")
+				button = ctk.CTkButton(scenetreecanvas, text="Camera2D", font=("", 15), fg_color="#252626")
+				button.configure(command=lambda button=button: self.select(button))
 			else:
-				button = ctk.CTkButton(scenetreecanvas, text=var, font=("", 15), fg_color="#252626")
+				button = ctk.CTkButton(scenetreecanvas, text=each.name.rstrip("\n"), font=("", 15), fg_color="#252626")
+				button.configure(command=lambda button=button: self.select(button))
 
+
+			
 			if each.type != "Camera2D":
 				button.bind("<Button-3>", self.open_menu)
 				self.button_file_map[button] = var
@@ -382,6 +387,17 @@ class SceneTree:
 		canvas_width = scenetreecanvas.winfo_width()
 		canvas_height = lastpos[1] + 60
 		scenetreecanvas.configure(scrollregion=(0, 0, canvas_width, canvas_height))
+
+	def select(self, object1=None):
+		if self.selected_object is not None:
+			self.selected_object.configure(fg_color="#252626")
+		object1.configure(fg_color="#a1a1a1")
+		self.selected_object = object1
+
+
+
+		
+
 
 
 
@@ -414,6 +430,9 @@ class SceneTree:
 		exlist = []
 		exlist.append(objectname)
 		readfile.remove(exlist[0].rstrip("\n")+"\n")
+
+
+		os.remove("projects/"+project_name+"/Scenes/"+self.currentscene+"/"+exlist[0].rstrip("\n")+".config")
 
 		writefile = open("projects/"+project_name+"/Scenes/"+self.currentscene+".txt", "w")
 		for lines in readfile:
@@ -476,6 +495,10 @@ def add_sprite():
 		for i in objectstemp:
 			writefile.writelines(i+"\n")
 		scenes[scenetree.currentsceneindex].objects.append(Scene.Sprite2D(value))
+		spriteconfig = ["#TRANSFORM","0","0","#IMAGETEXTURE","none"]
+	with open("projects/"+project_name+"/Scenes/"+scenetree.currentscene+"/"+value+".config", "w") as f:
+		for lines in spriteconfig:
+			f.write(lines+"\n")
 	scenetree.update()
 
 
@@ -511,6 +534,13 @@ properties_panel_label.pack()
 properties_panel_label.place(relwidth=1,relheight=1)
 
 
+class Properties:
+	def __init__(self):
+		self.currentobject = ""
+		self.objecttype = ""
+	def update(self):
+		pass
+
 
 
 
@@ -544,7 +574,7 @@ class Viewport:
 
 
 general_update("startup")
-
+scenetree.select(scenetree.displayed_objects[0])
 
 app.mainloop()
 

@@ -310,6 +310,14 @@ while True:
 			with open(actualfile, 'w') as f:
 				f.write('')
 
+			folder = os.path.join(file_path, "DefaultScene")
+			os.mkdir(folder)
+			actualfile = os.path.join(folder, "Camera2D.config")
+			cameraconfig = ["#TRANSFORM","0","0","#BGCOLOR","#ffffff"]
+			with open(actualfile, 'w') as f:
+				for strings in cameraconfig:
+					f.write(strings+"\n")
+
 			loe = len(registered_projects_temp)
 			currentindex = 0
 			for elements in registered_projects_temp:
