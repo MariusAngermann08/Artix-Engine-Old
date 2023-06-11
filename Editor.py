@@ -16,12 +16,16 @@
 
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import messagebox
+from tkinter import colorchooser
 import os
 import customtkinter as ctk
 from PIL import Image
 import shutil
 import subprocess
 import sys
+import re
+
 
 openfile = open("prcopen.info", "r")
 readfile = openfile.readlines()
@@ -324,7 +328,7 @@ def general_update(preset="startup"):
 	print(scenes[0].objects)
 
 class SceneTree:
-	def __init__(self,link=[],general_update=[]):
+	def __init__(self,link=[],general_update=[],properties1=[]):
 		self.menu = tk.Menu(app, tearoff=0)
 		self.menu.add_command(label="Delete", command=self.delete_object, font=("",15))
 		self.button_file_map = {}
@@ -332,6 +336,7 @@ class SceneTree:
 		self.currentselected = "Camera2D"
 		self.selected_object = None
 		self.sceneslink = link
+		self.properties_panel = properties1
 		self.currentscene = ""
 		self.displayed_objects = []
 		self.registeredscenes = []
@@ -388,7 +393,7 @@ class SceneTree:
 		canvas_height = lastpos[1] + 60
 		scenetreecanvas.configure(scrollregion=(0, 0, canvas_width, canvas_height))
 
-	def select(self, object1=None, name="empty"):
+	def select(self, object1=None, name="Camera2D"):
 		if self.selected_object is not None:
 			try:	
 				self.selected_object.configure(fg_color="#252626")
@@ -397,6 +402,8 @@ class SceneTree:
 				pass
 		object1.configure(fg_color="#a1a1a1")
 		self.selected_object = object1
+		self.selected_name = object1.cget("text")
+		self.properties_panel.update()
 
 
 
@@ -453,11 +460,6 @@ class SceneTree:
 		objects = self.button_file_map[button]
 		self.menu.entryconfig(0, command=lambda: self.delete_object(objects))
 		self.menu.post(event.x_root, event.y_root)
-
-	
-
-scenetree = SceneTree(link=scenes,general_update=general_update)
-
 
 class Scene:
 	def __init__(self,name="untitled",link=[]):
@@ -534,22 +536,111 @@ properties_panel_canvas = ctk.CTkCanvas(properties_panel_frame,bg="#666666")
 properties_panel_canvas.pack()
 properties_panel_canvas.place(x=0,y=0,relwidth=1,relheight=1)
 
-properties_panel_label = ctk.CTkLabel(properties_panel_heading,text="Properties",font=("",20))
+properties_panel_label = ctk.CTkLabel(properties_panel_heading,text="Properties",font=("",22), anchor="w")
 properties_panel_label.pack()
-properties_panel_label.place(relwidth=1,relheight=1)
-
+properties_panel_label.place(x=20,y=0,relwidth=1,relheight=1)
 
 class Properties:
 	def __init__(self):
 		self.currentobject = ""
+		self.objx = 0
+		self.objy = 0
 		self.objecttype = ""
+		self.displayed_objects = []
+		self.scenetreelink = None
+		self.bg_color = ""
 	def update(self):
-		pass
+		for objects in self.displayed_objects:
+			objects.destroy()
+		self.displayed_objects.clear()
+
+		openfile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+self.scenetreelink.selected_name+".config","r")
+		readfile = openfile.readlines()
+		openfile.close()
+		objecttemp = []
+		for lines in readfile:
+			objecttemp.append(lines.rstrip("\n"))
+
+		transx = int(objecttemp[1])
+		transy = int(objecttemp[2])
+
+		self.bg_color = objecttemp[4]
+
+		self.objx = transx
+		self.objy = transy
+
+		transformlabel = ctk.CTkLabel(properties_panel_canvas, text="Transform:", font=("",20))
+		transformlabel.pack()
+		transformlabel.place(x=10,y=0,relwidth=0.4,relheight=0.2)
+		self.displayed_objects.append(transformlabel)
+		xlabel = ctk.CTkLabel(properties_panel_canvas, text="X:", font=("",18))
+		xlabel.pack()
+		xlabel.place(x=20,y=85,relwidth=0.1,relheight=0.045)
+		self.displayed_objects.append(xlabel)
+		xentry = ctk.CTkEntry(properties_panel_canvas)
+		xentry.insert(0, str(transx))
+		xentry.pack()
+		xentry.place(x=50,y=85,relwidth=0.15)
+		self.displayed_objects.append(xentry)
+		ylabel = ctk.CTkLabel(properties_panel_canvas, text="Y:", font=("",18))
+		ylabel.pack()
+		ylabel.place(x=90,y=85,relwidth=0.1,relheight=0.045)
+		self.displayed_objects.append(ylabel)
+		yentry = ctk.CTkEntry(properties_panel_canvas)
+		yentry.insert(0, str(transy))
+		yentry.pack()
+		yentry.place(x=120,y=85,relwidth=0.15)
+		self.displayed_objects.append(yentry)
+
+		if self.scenetreelink.selected_name == "Camera2D":
+			colorlabel = ctk.CTkLabel(properties_panel_canvas, text="Background Color", font=("",20))
+			colorlabel.pack()
+			colorlabel.place(x=10,y=125,relwidth=0.65,relheight=0.05)
+			self.displayed_objects.append(colorlabel)
+			colorpreview = ctk.CTkFrame(properties_panel_canvas, width=100, height=35, fg_color=objecttemp[4])
+			colorpreview.pack()
+			colorpreview.place(x=20,y=165)
+			self.displayed_objects.append(colorpreview)
+			changebutton = ctk.CTkButton(properties_panel_canvas, text="     🖊️", font=("",20), command=self.pick_color)
+			changebutton.pack()
+			changebutton.place(x=120,y=165,relwidth=0.15,relheight=0.055)
+			self.displayed_objects.append(changebutton)
+	def apply(self):
+		openfile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+self.scenetreelink.selected_name+".config","r")
+		readfile = openfile.readlines()
+		openfile.close()
+		objecttemp = []
+		for lines in readfile:
+			objecttemp.append(lines.rstrip("\n"))
+
+		if re.match(r'^\d+$', self.displayed_objects[2].get()) and re.match(r'^\d+$', self.displayed_objects[4].get()):
+			objecttemp[1] = self.displayed_objects[2].get()
+			objecttemp[2] = self.displayed_objects[4].get()
+
+			if self.scenetreelink.selected_name == "Camera2D":
+				objecttemp[4] = self.bg_color
+
+			writefile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+self.scenetreelink.selected_name+".config","w")
+			for lines in objecttemp:
+				writefile.writelines(lines+"\n")
+			writefile.close()
+		else:
+			messagebox.showwarning("Warning", "Transform value is not valid!")
 
 
 
+		self.update()
+	def pick_color(self):
+		self.bg_color = colorchooser.askcolor()[1]
+		self.displayed_objects[6].configure(fg_color=self.bg_color)
 
+properties_panel = Properties()
+scenetree = SceneTree(link=scenes,general_update=general_update,properties1=properties_panel)
+properties_panel.scenetreelink = scenetree
 
+properties_apply_button = ctk.CTkButton(properties_panel_heading, text="Apply", fg_color="#5f9467", font=("",20), command=properties_panel.apply)
+properties_apply_button.pack()
+properties_apply_button.place(x=170,y=5,relwidth=0.3)
 
 
 viewport = ctk.CTkCanvas(app,width=1100,height=630)
