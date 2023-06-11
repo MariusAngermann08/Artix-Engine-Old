@@ -304,6 +304,9 @@ while True:
 			with open(file_path, 'w') as f:
 				f.write('DefaultScene')
 
+			file_path = os.path.join(new_folder_path, "Files")
+			os.mkdir(file_path)
+
 			file_path = os.path.join(new_folder_path, "Scenes")
 			os.mkdir(file_path)
 			actualfile = os.path.join(file_path, "DefaultScene.txt")

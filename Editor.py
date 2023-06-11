@@ -116,6 +116,9 @@ class FileManager:
 		self.files_list = []
 		self.button_file_map = {}
 		self.FileLoader()
+		self.dragged = False
+		self.dragged_button = None
+
 
 	def FileLoader(self):
 		self.files_list.clear()
@@ -138,6 +141,8 @@ class FileManager:
 			testimg = ctk.CTkImage(dark_image=Image.open("src/icons/image_icon.png"),size=(50,60))
 			button = ctk.CTkButton(file_manager_frame, text="", image=testimg, width=50, height=60)
 			button.bind("<Button-3>", self.open_menu)
+			button.bind("<ButtonPress-1>", lambda event, button=button: self.on_button_press(event, button))
+			button.bind("<ButtonRelease-1>", self.on_button_release)
 			name_label = ctk.CTkLabel(file_manager_frame, text=lines, fg_color="transparent")
 			self.button_file_map[button] = lines
 			self.displayed_files.append(testimg)
@@ -235,14 +240,15 @@ class FileManager:
 		self.menu.entryconfig(0, command=lambda: self.delete_file(file))
 		self.menu.post(event.x_root, event.y_root)
 
-	
+	def on_button_press(self, event, button):
+		print("press")
+		app.config(cursor="icon")
+		self.dragged = True
+		self.dragged_button = button
 
-fm = FileManager()
-fm.display_files()
-fm.update()
-
-
-
+	def on_button_release(self, event):
+		app.config(cursor="")
+		
 
 
 def import_file():
@@ -255,6 +261,7 @@ def import_file():
 		with open("projects/"+project_name+"/files.txt", "w") as openfile:
 			openfile.writelines(readfile)
 		fm.update()
+	shutil.copy(filename, "projects/"+project_name+"/Files/"+file_name)
 
 
 
@@ -549,9 +556,16 @@ class Properties:
 		self.displayed_objects = []
 		self.scenetreelink = None
 		self.bg_color = ""
+		self.touch = False
+		self.frame1 = None
 	def update(self):
+		self.currentobject = self.scenetreelink.selected_name
 		for objects in self.displayed_objects:
-			objects.destroy()
+			try:
+				objects.destroy()
+			except:
+				pass
+		self.displayed_objects = []
 		self.displayed_objects.clear()
 
 		openfile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+self.scenetreelink.selected_name+".config","r")
@@ -605,6 +619,44 @@ class Properties:
 			changebutton.pack()
 			changebutton.place(x=120,y=165,relwidth=0.15,relheight=0.055)
 			self.displayed_objects.append(changebutton)
+		else:
+			imagelabel = ctk.CTkLabel(properties_panel_canvas, text="Image Texture", font=("",20))
+			imagelabel.pack()
+			imagelabel.place(x=10,y=125,relwidth=0.55,relheight=0.05)
+			self.displayed_objects.append(imagelabel)
+			imagepreview = ctk.CTkFrame(properties_panel_canvas, width=100, height=100, fg_color="#ffffff")
+			imagepreview.pack()
+			imagepreview.place(x=20,y=165)
+			self.frame1 = imagepreview
+			self.displayed_objects.append(imagepreview)
+			
+			if objecttemp[4] == "none":
+				previewlabel = ctk.CTkLabel(imagepreview, text="no texture", text_color="#8a8a8a", font=("",15))
+				previewlabel.pack()
+				previewlabel.place(relwidth=1,relheight=1)
+				self.displayed_objects.append(previewlabel)
+			else:
+				previewimage = ctk.CTkImage(dark_image=Image.open("projects/"+project_name+"/Files/"+objecttemp[4]),size=(80,80))
+				previewlabel = ctk.CTkLabel(imagepreview, image=previewimage, text="")
+				previewlabel.pack()
+				previewlabel.place(relwidth=1,relheight=1)
+				self.displayed_objects.append(previewlabel)
+
+	def inframe(self):
+		searched = self.displayed_objects[self.displayed_objects.index(self.frame1)]
+		frame_x = searched.winfo_rootx()
+		frame_y = searched.winfo_rooty()
+		frame_width = searched.winfo_width()
+		frame_height = searched.winfo_height()
+		cursor_x = app.winfo_pointerx()
+		cursor_y = app.winfo_pointery()
+
+		if frame_x <= cursor_x <= frame_x + frame_width and frame_y <= cursor_y <= frame_y + frame_height:
+			return True
+		else:
+			return False
+
+
 	def apply(self):
 		openfile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+self.scenetreelink.selected_name+".config","r")
 		readfile = openfile.readlines()
@@ -631,12 +683,42 @@ class Properties:
 
 		self.update()
 	def pick_color(self):
-		self.bg_color = colorchooser.askcolor()[1]
-		self.displayed_objects[6].configure(fg_color=self.bg_color)
+		fbg_color = colorchooser.askcolor()[1]
+		if fbg_color != None:
+			self.bg_color = fbg_color
+			self.displayed_objects[6].configure(fg_color=self.bg_color)
+
+fm = FileManager()
+fm.display_files()
+fm.update()
 
 properties_panel = Properties()
 scenetree = SceneTree(link=scenes,general_update=general_update,properties1=properties_panel)
 properties_panel.scenetreelink = scenetree
+
+def on_left_button_release(event):
+	if scenetree.selected_name != "Camera2D":
+		print("nocamera")
+		if fm.dragged == True and properties_panel.inframe() == True:
+			openfile = open("projects/"+project_name+"/Scenes/"+scenetree.currentscene+"/"+scenetree.selected_name+".config","r")
+			readfile = openfile.readlines()
+			openfile.close()
+			objecttemp = []
+			for lines in readfile:
+				objecttemp.append(lines.rstrip("\n"))
+			objecttemp[4] = fm.button_file_map[fm.dragged_button]
+
+			writefile = open("projects/"+project_name+"/Scenes/"+scenetree.currentscene+"/"+scenetree.selected_name+".config","w")
+			for lines in objecttemp:
+				writefile.writelines(lines+"\n")
+			writefile.close()
+
+			properties_panel.update()
+
+
+app.bind("<ButtonRelease-1>", on_left_button_release)
+
+
 
 properties_apply_button = ctk.CTkButton(properties_panel_heading, text="Apply", fg_color="#5f9467", font=("",20), command=properties_panel.apply)
 properties_apply_button.pack()
