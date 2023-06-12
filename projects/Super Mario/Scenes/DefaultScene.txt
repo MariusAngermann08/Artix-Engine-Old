@@ -1,3 +1,0 @@
-Player
-Plattform1
-Plattform2
