@@ -42,6 +42,7 @@ class Engine:
 		self.frame_rate = new_frame_rate
 		self.screen = pygame.display.set_mode(self.render_size)
 		pygame.display.set_caption(self.render_caption)
+
 	class Scene:
 		game_objects = []
 		rigid_bodies = []
@@ -53,18 +54,17 @@ class Engine:
 			self.clock = pygame.time.Clock()
 			self.space = pymunk.Space()
 			self.space.gravity = (0,500)
-		def render(self):
+		def render(self,ev=None):
 			self.space.step(1/50)
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
-					pygame.quit()
-					sys.exit()
 			self.screen.fill(self.bg_color)
+	
 			for objects in self.game_objects:
-				objects.object_process()
+				objects.object_process(ev)
 				if objects.object_instance != "none":
 					rotated_obj = pygame.transform.rotate(objects.object_instance, objects.transform.rotation)
 					self.screen.blit(pygame.transform.scale(rotated_obj, (objects.transform.scale.x,objects.transform.scale.y)), objects.object_coord)
+			
+			
 			pygame.display.update()
 			self.clock.tick(self.frame_rate)
 
@@ -86,9 +86,85 @@ class Engine:
 				self.transform = self.Transform()
 				self.attributes = self.Attributes()
 				self.velocity_y = 0
+				self.eventsystem = self.EventSystem(self)
 
-			def object_process(self):
-				
+
+			class EventSystem:
+				def __init__(self, rootlink=None):
+					self.root_node = []
+					self.root = rootlink
+				def process(self, pro=None):
+					for events in self.root_node:
+						events.check(pro)
+				class Event:
+					def __init__(self,own_type="",argument1=""):
+						self.actions = []
+						self.events = []
+						self.type = own_type
+						self.argument1 = argument1
+					def check(self, k=None):
+						if self.type == "keypress":
+							keymap = {
+								"UP": pygame.K_UP,
+								"DOWN": pygame.K_DOWN,
+								"RIGHT": pygame.K_RIGHT,
+								"LEFT": pygame.K_LEFT,
+								"a": pygame.K_a,
+								"b": pygame.K_b,
+								"c": pygame.K_c,
+								"d": pygame.K_d,
+								"e": pygame.K_e,
+								"f": pygame.K_f,
+								"g": pygame.K_g,
+								"h": pygame.K_h,
+								"i": pygame.K_i,
+								"j": pygame.K_j,
+								"k": pygame.K_k,
+								"l": pygame.K_l,
+								"m": pygame.K_m,
+								"n": pygame.K_n,
+								"o": pygame.K_o,
+								"p": pygame.K_p,
+								"q": pygame.K_q,
+								"r": pygame.K_r,
+								"s": pygame.K_s,
+								"t": pygame.K_t,
+								"u": pygame.K_u,
+								"v": pygame.K_v,
+								"w": pygame.K_w,
+								"x": pygame.K_x,
+								"y": pygame.K_y,
+								"z": pygame.K_z,
+								"space": pygame.K_SPACE
+							}
+
+						for i in k:
+							if i.type == pygame.KEYDOWN:
+								if i.key == keymap[self.argument1]:
+									for a in self.actions:
+										a.run()
+									for a in self.events:
+										a.check()
+				class Action:
+					def __init__(self,rootlink=None, owntype="", argument1="", argument2=""):
+						self.type = owntype
+						self.argument1 = argument1
+						self.argument2 = argument2
+						self.root = rootlink
+					def run(self):
+						if self.type == "print":
+							print(self.argument1)
+						elif self.type == "apply_force":
+							self.root.apply_force((int(self.argument1),int(self.argument2)))
+
+
+
+
+			def object_process(self, event1=None):
+
+				self.eventsystem.process(event1)
+
+
 				self.object_coord[0] = self.transform.position.x
 				self.object_coord[1] = self.transform.position.y
 
@@ -210,6 +286,9 @@ floor.attributes.attribute_names.append("PhysicsObject")
 
 
 
+#events
+player.eventsystem.root_node.append(player.eventsystem.Event("keypress","k"))
+player.eventsystem.root_node[0].actions.append(player.eventsystem.Action(player.eventsystem.root,"apply_force", "0", "-20"))
 
 
 
@@ -221,10 +300,12 @@ new_scene.game_objects.append(floor)
 
 running = True
 while running:
+	events = []
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			pygame.quit()
 			sys.exit()
+		
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_SPACE:
 				player.apply_force((0,-20))
@@ -232,7 +313,10 @@ while running:
 				player.apply_force((5, 0))
 			if event.key == pygame.K_a:
 				player.apply_force((-5, 0))
+			events.append(event)
+
+	new_scene.render(events)
 		
-	new_scene.render()
+	
 
 

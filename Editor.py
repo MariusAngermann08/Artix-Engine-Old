@@ -21,6 +21,7 @@ from tkinter import colorchooser
 import os
 import customtkinter as ctk
 from PIL import Image
+from PIL import ImageTk
 import shutil
 import subprocess
 import sys
@@ -400,17 +401,21 @@ class SceneTree:
 		canvas_height = lastpos[1] + 60
 		scenetreecanvas.configure(scrollregion=(0, 0, canvas_width, canvas_height))
 
-	def select(self, object1=None, name="Camera2D"):
-		if self.selected_object is not None:
+	def select(self, object1=None, name="Camera2D", param="no"):
+
+		if self.selected_object is not None or param == "yes":
 			try:	
 				self.selected_object.configure(fg_color="#252626")
 			except:
 				#happens when new object is created or existing deleted (I dont know why)
 				pass
-		object1.configure(fg_color="#a1a1a1")
-		self.selected_object = object1
-		self.selected_name = object1.cget("text")
-		self.properties_panel.update()
+		if param == "no":
+			object1.configure(fg_color="#a1a1a1")
+			self.selected_object = object1
+			self.selected_name = object1.cget("text")
+			self.properties_panel.update()
+		else:
+			pass
 
 
 
@@ -558,6 +563,8 @@ class Properties:
 		self.bg_color = ""
 		self.touch = False
 		self.frame1 = None
+	def assign(self,viewportlink=None):
+		self.viewportlink = viewportlink
 	def update(self):
 		self.currentobject = self.scenetreelink.selected_name
 		for objects in self.displayed_objects:
@@ -575,8 +582,10 @@ class Properties:
 		for lines in readfile:
 			objecttemp.append(lines.rstrip("\n"))
 
-		transx = int(objecttemp[1])
-		transy = int(objecttemp[2])
+		transx = float(objecttemp[1])
+		transy = float(objecttemp[2])
+		transx = int(transx)
+		transy = int(transy)
 
 		self.bg_color = objecttemp[4]
 
@@ -641,6 +650,7 @@ class Properties:
 				previewlabel.pack()
 				previewlabel.place(relwidth=1,relheight=1)
 				self.displayed_objects.append(previewlabel)
+		self.viewportlink.update()
 
 	def inframe(self):
 		searched = self.displayed_objects[self.displayed_objects.index(self.frame1)]
@@ -678,6 +688,7 @@ class Properties:
 			writefile.close()
 		else:
 			messagebox.showwarning("Warning", "Transform value is not valid!")
+		self.viewportlink.update()
 
 
 
@@ -688,12 +699,233 @@ class Properties:
 			self.bg_color = fbg_color
 			self.displayed_objects[6].configure(fg_color=self.bg_color)
 
+viewport_canvas = ctk.CTkCanvas(app,width=1100,height=630)
+viewport_canvas.pack()
+viewport_canvas.place(x=415,y=5)
+
+event_system_button = ctk.CTkButton(viewport_canvas,text="Event System",corner_radius=0, fg_color="#5f6670", font=("",20),command=EventSystemWindow)
+event_system_button.pack()
+event_system_button.place(x=0,y=0,relwidth=0.2,relheight=0.1)
+
+attributes_button = ctk.CTkButton(viewport_canvas,text="Attributes",corner_radius=0, fg_color="#5f6670", font=("",20),command=AttributesWindow)
+attributes_button.pack()
+attributes_button.place(x=150,y=0,relwidth=0.2,relheight=0.1)
+
+#viewporttools = ctk.CTkSegmentedButton(viewport_canvas,values=["Move","Scale","Rotate"])
+#viewporttools.pack()
+#viewporttools.place(x=0,y=45)
+
+
+class Viewport:
+	def __init__(self, scenetreelink=None):
+		self.displayed_objects = []
+		self.scenetreelink = scenetreelink
+		self.imagetks = []
+		self.drag_data = {'x': 0, 'y': 0, 'item_id': None}
+		self.currentitem = None
+		self.itemtable = {}
+		self.selected_item_id = None
+		self.outline_color = 'blue'
+		self.outline_width = 2
+
+	def start_drag(self, event):
+		item_id = event.widget.find_closest(event.x, event.y)
+		self.drag_data['item_id'] = item_id[0]
+
+		# Get the bounding box of the object
+		bbox = event.widget.bbox(item_id[0])
+
+		# Calculate the middle position of the object
+		middle_x = (bbox[0] + bbox[2]) / 2
+		middle_y = (bbox[1] + bbox[3]) / 2
+
+		# Set the cursor position to the middle of the object
+		self.drag_data['x'] = middle_x
+		self.drag_data['y'] = middle_y
+
+
+		self.selected_item_id = item_id[0]
+
+
+
+		
+		
+
+
+	def drag(self, event):
+		dx = event.x - self.drag_data['x']
+		dy = event.y - self.drag_data['y']
+		event.widget.move(self.drag_data['item_id'], dx, dy)
+		self.drag_data['x'] = event.x
+		self.drag_data['y'] = event.y
+
+	def stop_drag(self, event):
+		self.drag_data['x'] = event.x
+		self.drag_data['y'] = event.y
+		x = self.drag_data["x"]
+		y = self.drag_data["y"]
+		name = self.itemtable[self.drag_data['item_id']].rstrip("\n")
+
+		if self.selected_item_id is not None:
+			viewport_canvas.delete('outline')
+
+		self.selected_item_id = self.drag_data['item_id']
+
+		bbox = viewport_canvas.bbox(self.selected_item_id)
+
+		outline_id = viewport_canvas.create_rectangle(
+			bbox[0], bbox[1], bbox[2], bbox[3],
+			outline=self.outline_color, width=self.outline_width, tags='outline'
+		)
+
+		viewport_canvas.tag_raise(outline_id)
+		print("Coordinates:", x, y)
+		self.drag_data = {'x': 0, 'y': 0, 'item_id': None}
+
+		old_width = 1100
+		old_height = 630
+
+		new_width = 800
+		new_height = 600
+
+		old_x = int(x)
+		old_y = int(y)
+
+		new_x = (old_x / old_width) * new_width
+		new_y = (old_y / old_height) * new_height
+
+		openfile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+name+".config", "r")
+		readfile = openfile.readlines()
+		openfile.close()
+		objecttemp = []
+		for lines in readfile:
+			objecttemp.append(lines.rstrip("\n"))
+
+		objecttemp[1] = str(new_x)
+		objecttemp[2] = str(new_y)
+
+		writefile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+name+".config", "w")
+		for lines in objecttemp:
+			writefile.writelines(lines+"\n")
+		writefile.close()
+
+		self.properties.update()
+
+		for objects in self.scenetreelink.displayed_objects:
+			print("loop")
+			text = objects.cget("text")
+			print(text,name)
+			if text == name:
+				index = self.scenetreelink.select(self.scenetreelink.displayed_objects[self.scenetreelink.displayed_objects.index(objects)], "nk")
+				break
+
+
+
+
+
+
+	def secondinit(self, propertieslink=None):
+		self.properties = propertieslink
+
+	def update(self):
+		for objects in self.displayed_objects:
+			objects.destroy()
+		self.displayed_objects.clear()
+		self.imagetks.clear()
+
+		generalopen = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/Camera2D.config", "r")
+		generalread = generalopen.readlines()
+		generalopen.close()
+		objecttemp = []
+		for lines in generalread:
+			objecttemp.append(lines.rstrip("\n"))
+		color = objecttemp[4]
+		viewport_canvas.configure(bg=color)
+
+		searched = 0
+		for differentscenes in scenes:
+			if differentscenes.name == self.scenetreelink.currentscene:
+				searched = scenes.index(differentscenes)
+				break
+		currentindex = 0
+		for objs in scenes[searched].objects:
+			if objs.type != "Camera2D":
+				print(objs.name)
+		gap = False
+		for objs in scenes[searched].objects:
+			if currentindex == 0:
+				currentindex += 1
+				continue
+
+			
+			print("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+objs.name+".config")
+			if objs.name != "":
+				openfile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+objs.name.rstrip("\n")+".config", "r")
+				print("opened")
+			else:
+				continue
+			
+			readfile = openfile.readlines()
+			openfile.close()
+			objecttemp = []
+			for lines in readfile:
+				objecttemp.append(lines.rstrip("\n"))
+
+			posx = objecttemp[1]
+			posy = objecttemp[2]
+
+			game_width = 800
+			game_height = 600
+			editor_width = 1100
+			editor_height = 630
+
+			game_x = float(posx)
+			game_y = float(posy)
+
+
+			x_scale = editor_width / game_width
+			y_scale = editor_height / game_height
+
+			editor_x = game_x * x_scale
+			editor_y = game_y * y_scale
+
+			print("there")
+			if objecttemp[4] == "none": 
+				pass
+			else:
+				image0 = Image.open("projects/"+project_name+"/Files/"+objecttemp[4])
+				image1 = image0.resize((180, 180))
+				image_tk = ImageTk.PhotoImage(image1)
+				self.imagetks.append(image_tk)
+
+				item_id = viewport_canvas.create_image(editor_x, editor_y, image=image_tk)
+				self.itemtable[item_id] = objs.name
+				viewport_canvas.tag_bind(item_id, '<ButtonPress-1>', self.start_drag)
+				viewport_canvas.tag_bind(item_id, '<B1-Motion>', self.drag)
+				viewport_canvas.tag_bind(item_id, '<ButtonRelease-1>', self.stop_drag)
+			
+
+	
+
+
+
+
+
+
+
 fm = FileManager()
 fm.display_files()
 fm.update()
 
+
+
 properties_panel = Properties()
 scenetree = SceneTree(link=scenes,general_update=general_update,properties1=properties_panel)
+viewport = Viewport(scenetree)
+properties_panel.assign(viewport)
+viewport.secondinit(properties_panel)
+
+
 properties_panel.scenetreelink = scenetree
 
 def on_left_button_release(event):
@@ -725,26 +957,7 @@ properties_apply_button.pack()
 properties_apply_button.place(x=170,y=5,relwidth=0.3)
 
 
-viewport = ctk.CTkCanvas(app,width=1100,height=630)
-viewport.pack()
-viewport.place(x=415,y=5)
 
-event_system_button = ctk.CTkButton(viewport,text="Event System",corner_radius=0, fg_color="#5f6670", font=("",20),command=EventSystemWindow)
-event_system_button.pack()
-event_system_button.place(x=0,y=0,relwidth=0.2,relheight=0.1)
-
-attributes_button = ctk.CTkButton(viewport,text="Attributes",corner_radius=0, fg_color="#5f6670", font=("",20),command=AttributesWindow)
-attributes_button.pack()
-attributes_button.place(x=150,y=0,relwidth=0.2,relheight=0.1)
-
-viewporttools = ctk.CTkSegmentedButton(viewport,values=["Move","Scale","Rotate"])
-viewporttools.pack()
-viewporttools.place(x=0,y=45)
-
-
-class Viewport:
-	def __init__(self):
-		pass
 
 
 
@@ -753,6 +966,7 @@ class Viewport:
 
 general_update("startup")
 scenetree.select(scenetree.displayed_objects[0])
+viewport.update()
 
 app.mainloop()
 
