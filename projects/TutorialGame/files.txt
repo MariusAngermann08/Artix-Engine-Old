@@ -1,0 +1,3 @@
+player.png
+plattform.png
+spikes_plattform.png

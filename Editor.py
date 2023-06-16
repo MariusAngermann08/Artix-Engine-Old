@@ -280,6 +280,31 @@ def AttributesWindow():
 	root.geometry("800x600")
 	root.title("Attributes")
 	root.iconbitmap("src/icon.ico")
+
+	class Attributes:
+		def __init__(self):
+			self.displayed_objects = []
+		def update(self):
+			pass
+
+	def add_attribute(type=""):
+		pass
+
+	def add_menu(event):
+		addattributemenu.post(addattributebutton.winfo_rootx(), addattributebutton.winfo_rooty() + addattributebutton.winfo_height())
+
+	addattributebutton = ctk.CTkButton(root, text="+", fg_color="#5f9467", font=("",20))
+	addattributebutton.pack()
+	addattributebutton.place(x=5,y=5,relwidth=0.1,relheight=0.1)
+	addattributebutton.bind("<Button-1>", add_menu)
+
+	addattributemenu = tk.Menu(root, tearoff=0)
+	addattributemenu.add_command(label="Gravity",font=("",15),command=lambda: add_attribute("gravity"))
+	addattributemenu.add_command(label="Physics Object",font=("",15),command=lambda: add_attribute("physicsobject"))
+	addattributemenu.add_command(label="Camera Follow",font=("",15),command=lambda: add_attribute("camerafollow"))
+
+
+
 	root.mainloop()
 
 def EventSystemWindow():
@@ -514,7 +539,7 @@ def add_sprite():
 		for i in objectstemp:
 			writefile.writelines(i+"\n")
 		scenes[scenetree.currentsceneindex].objects.append(Scene.Sprite2D(value))
-		spriteconfig = ["#TRANSFORM","0","0","#IMAGETEXTURE","none"]
+		spriteconfig = ["#TRANSFORM","0","0","180","180","#IMAGETEXTURE","none"]
 	with open("projects/"+project_name+"/Scenes/"+scenetree.currentscene+"/"+value+".config", "w") as f:
 		for lines in spriteconfig:
 			f.write(lines+"\n")
@@ -587,12 +612,18 @@ class Properties:
 		transx = int(transx)
 		transy = int(transy)
 
+		if self.scenetreelink.selected_name != "Camera2D":
+			scalex = float(objecttemp[3])
+			scaley = float(objecttemp[4])
+			scalex = int(scalex)
+			scaley = int(scaley)
+
 		self.bg_color = objecttemp[4]
 
 		self.objx = transx
 		self.objy = transy
 
-		transformlabel = ctk.CTkLabel(properties_panel_canvas, text="Transform:", font=("",20))
+		transformlabel = ctk.CTkLabel(properties_panel_canvas, text="Position:", font=("",20))
 		transformlabel.pack()
 		transformlabel.place(x=10,y=0,relwidth=0.4,relheight=0.2)
 		self.displayed_objects.append(transformlabel)
@@ -615,6 +646,25 @@ class Properties:
 		yentry.place(x=120,y=85,relwidth=0.15)
 		self.displayed_objects.append(yentry)
 
+		if self.scenetreelink.selected_name != "Camera2D":
+			scalelabel = ctk.CTkLabel(properties_panel_canvas, text="Scale:", font=("",20))
+			scalelabel.place(x=22,y=130)
+			self.displayed_objects.append(scalelabel)
+			xscalelabel = ctk.CTkLabel(properties_panel_canvas, text="X:", font=("",18))
+			xscalelabel.place(x=20,y=165,relwidth=0.1,relheight=0.045)
+			self.displayed_objects.append(xscalelabel)
+			xscale = ctk.CTkEntry(properties_panel_canvas)
+			xscale.insert(0, str(scalex))
+			xscale.place(x=50,y=165,relwidth=0.15)
+			self.displayed_objects.append(xscale)
+			yscalelabel = ctk.CTkLabel(properties_panel_canvas, text="Y:", font=("",18))
+			yscalelabel.place(x=90,y=165,relwidth=0.1,relheight=0.045)
+			self.displayed_objects.append(yscalelabel)
+			yscale = ctk.CTkEntry(properties_panel_canvas)
+			yscale.insert(0, str(scaley))
+			yscale.place(x=120,y=165,relwidth=0.15)
+			self.displayed_objects.append(yscale)
+
 		if self.scenetreelink.selected_name == "Camera2D":
 			colorlabel = ctk.CTkLabel(properties_panel_canvas, text="Background Color", font=("",20))
 			colorlabel.pack()
@@ -631,21 +681,21 @@ class Properties:
 		else:
 			imagelabel = ctk.CTkLabel(properties_panel_canvas, text="Image Texture", font=("",20))
 			imagelabel.pack()
-			imagelabel.place(x=10,y=125,relwidth=0.55,relheight=0.05)
+			imagelabel.place(x=15,y=210,relwidth=0.55,relheight=0.05)
 			self.displayed_objects.append(imagelabel)
 			imagepreview = ctk.CTkFrame(properties_panel_canvas, width=100, height=100, fg_color="#ffffff")
 			imagepreview.pack()
-			imagepreview.place(x=20,y=165)
+			imagepreview.place(x=25,y=255)
 			self.frame1 = imagepreview
 			self.displayed_objects.append(imagepreview)
 			
-			if objecttemp[4] == "none":
+			if objecttemp[6] == "none":
 				previewlabel = ctk.CTkLabel(imagepreview, text="no texture", text_color="#8a8a8a", font=("",15))
 				previewlabel.pack()
 				previewlabel.place(relwidth=1,relheight=1)
 				self.displayed_objects.append(previewlabel)
 			else:
-				previewimage = ctk.CTkImage(dark_image=Image.open("projects/"+project_name+"/Files/"+objecttemp[4]),size=(80,80))
+				previewimage = ctk.CTkImage(dark_image=Image.open("projects/"+project_name+"/Files/"+objecttemp[6]),size=(80,80))
 				previewlabel = ctk.CTkLabel(imagepreview, image=previewimage, text="")
 				previewlabel.pack()
 				previewlabel.place(relwidth=1,relheight=1)
@@ -687,7 +737,21 @@ class Properties:
 				writefile.writelines(lines+"\n")
 			writefile.close()
 		else:
-			messagebox.showwarning("Warning", "Transform value is not valid!")
+			messagebox.showwarning("Warning", "Position value is not valid!")
+
+		if self.scenetreelink.selected_name != "Camera2D":
+			if re.match(r'^\d+$', self.displayed_objects[7].get()) and re.match(r'^\d+$', self.displayed_objects[9].get()):
+				objecttemp[3] = self.displayed_objects[7].get()
+				objecttemp[4] = self.displayed_objects[9].get()
+
+				writefile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+self.scenetreelink.selected_name+".config","w")
+				for lines in objecttemp:
+					writefile.writelines(lines+"\n")
+				writefile.close()
+			else:
+				messagebox.showwarning("Warning", "Scale value is not valid!")
+
+
 		self.viewportlink.update()
 
 
@@ -699,17 +763,21 @@ class Properties:
 			self.bg_color = fbg_color
 			self.displayed_objects[6].configure(fg_color=self.bg_color)
 
+def build_game():
+	pass
+
+
 viewport_canvas = ctk.CTkCanvas(app,width=1100,height=630)
-viewport_canvas.pack()
 viewport_canvas.place(x=415,y=5)
 
 event_system_button = ctk.CTkButton(viewport_canvas,text="Event System",corner_radius=0, fg_color="#5f6670", font=("",20),command=EventSystemWindow)
-event_system_button.pack()
 event_system_button.place(x=0,y=0,relwidth=0.2,relheight=0.1)
 
 attributes_button = ctk.CTkButton(viewport_canvas,text="Attributes",corner_radius=0, fg_color="#5f6670", font=("",20),command=AttributesWindow)
-attributes_button.pack()
 attributes_button.place(x=150,y=0,relwidth=0.2,relheight=0.1)
+
+play_button = ctk.CTkButton(viewport_canvas,text="Play",command=build_game,corner_radius=0, fg_color="#49bf51", font=("",20))
+play_button.place(x=625,y=0,relwidth=0.15,relheight=0.1)
 
 #viewporttools = ctk.CTkSegmentedButton(viewport_canvas,values=["Move","Scale","Rotate"])
 #viewporttools.pack()
@@ -748,7 +816,7 @@ class Viewport:
 
 
 
-		
+
 		
 
 
@@ -890,11 +958,11 @@ class Viewport:
 			editor_y = game_y * y_scale
 
 			print("there")
-			if objecttemp[4] == "none": 
+			if objecttemp[6] == "none": 
 				pass
 			else:
-				image0 = Image.open("projects/"+project_name+"/Files/"+objecttemp[4])
-				image1 = image0.resize((180, 180))
+				image0 = Image.open("projects/"+project_name+"/Files/"+objecttemp[6])
+				image1 = image0.resize((int(objecttemp[3]),int(objecttemp[4])))
 				image_tk = ImageTk.PhotoImage(image1)
 				self.imagetks.append(image_tk)
 
@@ -938,7 +1006,7 @@ def on_left_button_release(event):
 			objecttemp = []
 			for lines in readfile:
 				objecttemp.append(lines.rstrip("\n"))
-			objecttemp[4] = fm.button_file_map[fm.dragged_button]
+			objecttemp[6] = fm.button_file_map[fm.dragged_button]
 
 			writefile = open("projects/"+project_name+"/Scenes/"+scenetree.currentscene+"/"+scenetree.selected_name+".config","w")
 			for lines in objecttemp:
