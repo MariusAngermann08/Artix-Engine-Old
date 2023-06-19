@@ -275,37 +275,6 @@ file_manager_button.place(relwidth=0.2,relheight=1)
 
 
 
-def AttributesWindow():
-	root = ctk.CTk()
-	root.geometry("800x600")
-	root.title("Attributes")
-	root.iconbitmap("src/icon.ico")
-
-	class Attributes:
-		def __init__(self):
-			self.displayed_objects = []
-		def update(self):
-			pass
-
-	def add_attribute(type=""):
-		pass
-
-	def add_menu(event):
-		addattributemenu.post(addattributebutton.winfo_rootx(), addattributebutton.winfo_rooty() + addattributebutton.winfo_height())
-
-	addattributebutton = ctk.CTkButton(root, text="+", fg_color="#5f9467", font=("",20))
-	addattributebutton.pack()
-	addattributebutton.place(x=5,y=5,relwidth=0.1,relheight=0.1)
-	addattributebutton.bind("<Button-1>", add_menu)
-
-	addattributemenu = tk.Menu(root, tearoff=0)
-	addattributemenu.add_command(label="Gravity",font=("",15),command=lambda: add_attribute("gravity"))
-	addattributemenu.add_command(label="Physics Object",font=("",15),command=lambda: add_attribute("physicsobject"))
-	addattributemenu.add_command(label="Camera Follow",font=("",15),command=lambda: add_attribute("camerafollow"))
-
-
-
-	root.mainloop()
 
 def EventSystemWindow():
 	root = ctk.CTk()
@@ -539,7 +508,7 @@ def add_sprite():
 		for i in objectstemp:
 			writefile.writelines(i+"\n")
 		scenes[scenetree.currentsceneindex].objects.append(Scene.Sprite2D(value))
-		spriteconfig = ["#TRANSFORM","0","0","180","180","#IMAGETEXTURE","none"]
+		spriteconfig = ["#TRANSFORM","200","200","180","180","#IMAGETEXTURE","none","#A-Physics","none","#A-Gravity","none","#A-Camerafollow","none"]
 	with open("projects/"+project_name+"/Scenes/"+scenetree.currentscene+"/"+value+".config", "w") as f:
 		for lines in spriteconfig:
 			f.write(lines+"\n")
@@ -773,9 +742,6 @@ viewport_canvas.place(x=415,y=5)
 event_system_button = ctk.CTkButton(viewport_canvas,text="Event System",corner_radius=0, fg_color="#5f6670", font=("",20),command=EventSystemWindow)
 event_system_button.place(x=0,y=0,relwidth=0.2,relheight=0.1)
 
-attributes_button = ctk.CTkButton(viewport_canvas,text="Attributes",corner_radius=0, fg_color="#5f6670", font=("",20),command=AttributesWindow)
-attributes_button.place(x=150,y=0,relwidth=0.2,relheight=0.1)
-
 play_button = ctk.CTkButton(viewport_canvas,text="Play",command=build_game,corner_radius=0, fg_color="#49bf51", font=("",20))
 play_button.place(x=625,y=0,relwidth=0.15,relheight=0.1)
 
@@ -993,8 +959,140 @@ viewport = Viewport(scenetree)
 properties_panel.assign(viewport)
 viewport.secondinit(properties_panel)
 
+def AttributesWindow():
+	if scenetree.selected_name == "Camera2D":
+		messagebox.showwarning("Warning", "Camera2D cant have Attributes")
+		return True
+
+	root = ctk.CTk()
+	root.geometry("800x600")
+	root.title("Attributes")
+	root.iconbitmap("src/icon.ico")
+
+	class Attributes:
+		def __init__(self):
+			self.displayed_objects = []
+			self.last = 60
+			self.selected = None
+			self.button_map = {}
+			self.indexmap = {}
+		def update(self):
+			self.last = 60
+
+			self.object = scenetree.selected_name
+			self.scene = scenetree.currentscene
+
+			#open the files
+			openfile = open("projects/"+project_name+"/Scenes/"+self.scene+"/"+self.object+".config", "r")
+			readfile = openfile.readlines()
+			openfile.close()
+			self.objecttemp = []
+			for lines in readfile:
+				self.objecttemp.append(lines.rstrip("\n"))
+
+			#clear for update
+			for objects in self.displayed_objects:
+				objects.destroy()
+			self.displayed_objects.clear()
+			self.button_map.clear()
+			self.indexmap.clear()
+
+			index = 0
+
+			if self.objecttemp[8] != "none":
+				value = self.objecttemp[8]
+				table = value.split(",")
+				button = ctk.CTkButton(root, text="PhysicsObject",font=("",20),fg_color="#353536")
+				button.configure(command=lambda button=button: self.select(button))
+				button.place(x=20,y=self.last,relwidth=0.4,relheight=0.15)
+				self.displayed_objects.append(button)
+				self.last += 70
+				self.button_map[button] = "PhysicsObject"
+				self.indexmap[button] = index
+				index += 1
+
+			if self.objecttemp[10] != "none":
+				value = self.objecttemp[10]
+				button = ctk.CTkButton(root, text="Gravity",font=("",20),fg_color="#353536")
+				button.configure(command=lambda button=button: self.select(button))
+				button.place(x=20,y=self.last,relwidth=0.4,relheight=0.15)
+				self.displayed_objects.append(button)
+				self.last += 70
+				self.button_map[button] = "Gravity"
+				self.indexmap[button] = index
+				index += 1
+		def select(self, object1=None):
+			if self.selected:
+				self.selected.configure(fg_color="#353536")
+			self.selected = object1
+			self.selection()
+
+		def selection(self):
+			self.displayed_objects[self.displayed_objects.index(self.selected)].configure(fg_color="#a1a1a1")
+
+
+	attributes = Attributes()
+	attributes.update()
+	if attributes.displayed_objects != []:
+		attributes.selected = attributes.displayed_objects[0]
+		attributes.selection()
+
+	def add_attribute(type1=""):
+		object1 = scenetree.selected_name
+		scene = scenetree.currentscene
+		#open the files
+		openfile = open("projects/"+project_name+"/Scenes/"+scene+"/"+object1+".config", "r")
+		readfile = openfile.readlines()
+		openfile.close()
+		objecttemp = []
+		for lines in readfile:
+			objecttemp.append(lines.rstrip("\n"))
+		if type1 == "PhysicsObject":
+			if objecttemp[8] != "none":
+				messagebox.showwarning("Warning", "Object already has Attribute PhysicsObject")
+			else:
+				objecttemp[8] = "False,1,100"
+				writefile = open("projects/"+project_name+"/Scenes/"+scene+"/"+object1+".config", "w")
+				for lines in objecttemp:
+					writefile.writelines(lines+"\n")
+				writefile.close()
+		if type1 == "Gravity":
+			if objecttemp[8] != "none":
+				messagebox.showwarning("Warning", "Object already has Attribute PhysicsObject")
+			else:
+				objecttemp[8] = "False,1,100"
+				writefile = open("projects/"+project_name+"/Scenes/"+scene+"/"+object1+".config", "w")
+				for lines in objecttemp:
+					writefile.writelines(lines+"\n")
+				writefile.close()
+		attributes.update()
+		if attributes.displayed_objects != []:
+			attributes.selected = attributes.displayed_objects[0]
+			attributes.selection()
+
+
+	def add_menu(event):
+		addattributemenu.post(addattributebutton.winfo_rootx(), addattributebutton.winfo_rooty() + addattributebutton.winfo_height())
+
+	addattributebutton = ctk.CTkButton(root, text="+", fg_color="#5f9467", font=("",20))
+	addattributebutton.pack()
+	addattributebutton.place(x=5,y=5,relwidth=0.1,relheight=0.1)
+	addattributebutton.bind("<Button-1>", add_menu)
+
+	addattributemenu = tk.Menu(root, tearoff=0)
+	addattributemenu.add_command(label="Gravity",font=("",15),command=lambda: add_attribute("gravity"))
+	addattributemenu.add_command(label="Physics Object",font=("",15),command=lambda: add_attribute("PhysicsObject"))
+	addattributemenu.add_command(label="Camera Follow",font=("",15),command=lambda: add_attribute("camerafollow"))
+
+
+
+	root.mainloop()
+
+
 
 properties_panel.scenetreelink = scenetree
+attributes_button = ctk.CTkButton(viewport_canvas,text="Attributes",corner_radius=0, fg_color="#5f6670", font=("",20),command=AttributesWindow)
+attributes_button.place(x=150,y=0,relwidth=0.2,relheight=0.1)
 
 def on_left_button_release(event):
 	if scenetree.selected_name != "Camera2D":
