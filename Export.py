@@ -23,7 +23,7 @@ class Export:
 				temp.append(lines.rstrip("\n"))
 		self.objects.append(temp)
 	
-		
+
 
 		#write the file
 		self.exportfile.append("import pygame\n")

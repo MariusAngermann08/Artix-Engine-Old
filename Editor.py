@@ -969,13 +969,25 @@ def AttributesWindow():
 	root.title("Attributes")
 	root.iconbitmap("src/icon.ico")
 
+	settingsframe = ctk.CTkFrame(root, width=250,height=380)
+	settingsframe.place(x=260,y=10)
+
+	settings = ctk.CTkLabel(settingsframe, text="Settings", font=("",30))
+	settings.place(x=0,y=5,relwidth=0.5,relheight=0.1)
+
+	apply_button = ctk.CTkButton(settingsframe, text="Apply", fg_color="#5f9467", font=("",20))
+	apply_button.pack()
+	apply_button.place(x=160,y=5,relwidth=0.3,relheight=0.1)
+
 	class Attributes:
 		def __init__(self):
 			self.displayed_objects = []
+			self.displayed_settings = []
 			self.last = 60
 			self.selected = None
 			self.button_map = {}
 			self.indexmap = {}
+			self.checkvar = ctk.StringVar(value="off")
 		def update(self):
 			self.last = 60
 
@@ -1004,6 +1016,7 @@ def AttributesWindow():
 				table = value.split(",")
 				button = ctk.CTkButton(root, text="PhysicsObject",font=("",20),fg_color="#353536")
 				button.configure(command=lambda button=button: self.select(button))
+				button.bind("<Button-3>", lambda event, button=button: self.show_delete_option(button))
 				button.place(x=20,y=self.last,relwidth=0.4,relheight=0.15)
 				self.displayed_objects.append(button)
 				self.last += 70
@@ -1015,6 +1028,7 @@ def AttributesWindow():
 				value = self.objecttemp[10]
 				button = ctk.CTkButton(root, text="Gravity",font=("",20),fg_color="#353536")
 				button.configure(command=lambda button=button: self.select(button))
+				button.bind("<Button-3>", lambda event, button=button: self.show_delete_option(button))
 				button.place(x=20,y=self.last,relwidth=0.4,relheight=0.15)
 				self.displayed_objects.append(button)
 				self.last += 70
@@ -1026,9 +1040,135 @@ def AttributesWindow():
 				self.selected.configure(fg_color="#353536")
 			self.selected = object1
 			self.selection()
+			self.settings()
 
 		def selection(self):
 			self.displayed_objects[self.displayed_objects.index(self.selected)].configure(fg_color="#a1a1a1")
+
+		def show_delete_option(self, button):
+			delete_menu = tk.Menu(root, tearoff=0)
+			delete_menu.add_command(label="Delete", font=("", 15), command=lambda: self.delete_attribute(button))
+			delete_menu.post(root.winfo_pointerx(), root.winfo_pointery())
+
+
+		def delete_attribute(self, button):
+			type1 = self.button_map[button]
+			if type1 == "PhysicsObject":
+				self.objecttemp[8] = "none"
+			if type1 == "Gravity":
+				self.objecttemp[10] = "none"
+			writefile = open("projects/"+project_name+"/Scenes/"+self.scene+"/"+self.object+".config", "w")
+			for lines in self.objecttemp:
+				writefile.writelines(lines+"\n")
+			writefile.close()
+			self.update()
+			if self.displayed_objects != []:
+				self.selected = attributes.displayed_objects[0]
+				self.selection()
+			self.settings()
+
+
+
+		def settings(self):
+			openfile = open("projects/"+project_name+"/Scenes/"+self.scene+"/"+self.object+".config", "r")
+			readfile = openfile.readlines()
+			openfile.close()
+			self.objecttemp = []
+			for lines in readfile:
+				self.objecttemp.append(lines.rstrip("\n"))
+
+			for objs in self.displayed_settings:
+				objs.destroy()
+			self.displayed_settings.clear()
+
+			try:
+				sel_name = self.button_map[self.selected]
+				if sel_name == "PhysicsObject":
+					list1 = self.objecttemp[8].split(",")
+					static = ctk.CTkLabel(settingsframe, text="Static:",font=("",19))
+					static.place(x=20,y=50,relwidth=0.2,relheight=0.1)
+					self.displayed_settings.append(static)
+
+					static_check = ctk.CTkCheckBox(settingsframe, text="CTkCheckBox", variable=self.checkvar, onvalue="on", offvalue="off")
+					static_check.place(x=80,y=50,relwidth=0.1,relheight=0.1)
+					if list1[0] == "True":
+						self.checkvar.set("on")
+					elif list1[0] == "False":
+						self.checkvar.set("off")
+					self.displayed_settings.append(static_check)
+
+					mass = ctk.CTkLabel(settingsframe, text="Mass:",font=("",19))
+					mass.place(x=20,y=90,relwidth=0.2,relheight=0.1)
+					self.displayed_settings.append(mass)
+
+					mass_entry = ctk.CTkEntry(settingsframe)
+					mass_entry.place(x=80,y=95,relwidth=0.3,relheight=0.075)
+					mass_entry.insert(0, list1[1])
+					self.displayed_settings.append(mass_entry)
+
+					inertia = ctk.CTkLabel(settingsframe, text="Inertia:",font=("",19))
+					inertia.place(x=17.5,y=130,relwidth=0.25,relheight=0.1)
+					self.displayed_settings.append(inertia)
+
+					inertia_entry = ctk.CTkEntry(settingsframe)
+					inertia_entry.place(x=80,y=135,relwidth=0.3,relheight=0.075)
+					inertia_entry.insert(0, list1[2])
+					self.displayed_settings.append(inertia_entry)
+				if sel_name == "Gravity":
+					mass = ctk.CTkLabel(settingsframe, text="Mass:",font=("",19))
+					mass.place(x=20,y=50,relwidth=0.2,relheight=0.1)
+					self.displayed_settings.append(mass)
+
+					mass_entry = ctk.CTkEntry(settingsframe)
+					mass_entry.place(x=80,y=55,relwidth=0.3,relheight=0.075)
+					mass_entry.insert(0, self.objecttemp[10])
+					self.displayed_settings.append(mass_entry)
+			except:
+				pass
+		def apply(self): #5
+			sel_name = self.button_map[self.selected]
+			if sel_name == "PhysicsObject":
+				if re.match(r'^\d+$', self.displayed_settings[3].get()):
+					if re.match(r'^\d+$', self.displayed_settings[5].get()):
+						bool1 = "False"
+						if self.checkvar.get() == "on":
+							bool1 = "True"
+						elif self.checkvar.get() == "off":
+							bool1 = "False"
+						self.objecttemp[8] = bool1+","+self.displayed_settings[3].get()+","+self.displayed_settings[5].get()
+						writefile = open("projects/"+project_name+"/Scenes/"+self.scene+"/"+self.object+".config", "w")
+						for lines in self.objecttemp:
+							writefile.writelines(lines+"\n")
+						writefile.close()
+						if attributes.displayed_objects != []:
+							self.selection()
+							self.settings()
+					else:
+						messagebox.showwarning("Warning", "Inertia value not valid")
+						if attributes.displayed_objects != []:
+							self.selection()
+							self.settings()
+				else:
+					messagebox.showwarning("Warning", "Mass value not valid")
+					if attributes.displayed_objects != []:
+							self.selection()
+							self.settings()
+			if sel_name == "Gravity":
+				if re.match(r'^\d+$', self.displayed_settings[1].get()):
+					self.objecttemp[10] = self.displayed_settings[1].get()
+					writefile = open("projects/"+project_name+"/Scenes/"+self.scene+"/"+self.object+".config", "w")
+					for lines in self.objecttemp:
+						writefile.writelines(lines+"\n")
+					writefile.close()
+					if attributes.displayed_objects != []:
+						self.selection()
+						self.settings()
+				else:
+					messagebox.showwarning("Warning", "Mass value not valid")
+					if attributes.displayed_objects != []:
+							self.selection()
+							self.settings()
+
 
 
 	attributes = Attributes()
@@ -1036,6 +1176,9 @@ def AttributesWindow():
 	if attributes.displayed_objects != []:
 		attributes.selected = attributes.displayed_objects[0]
 		attributes.selection()
+		attributes.settings()
+
+	apply_button.configure(command=attributes.apply)
 
 	def add_attribute(type1=""):
 		object1 = scenetree.selected_name
@@ -1057,10 +1200,10 @@ def AttributesWindow():
 					writefile.writelines(lines+"\n")
 				writefile.close()
 		if type1 == "Gravity":
-			if objecttemp[8] != "none":
-				messagebox.showwarning("Warning", "Object already has Attribute PhysicsObject")
+			if objecttemp[10] != "none":
+				messagebox.showwarning("Warning", "Object already has Attribute Gravity")
 			else:
-				objecttemp[8] = "False,1,100"
+				objecttemp[10] = "1"
 				writefile = open("projects/"+project_name+"/Scenes/"+scene+"/"+object1+".config", "w")
 				for lines in objecttemp:
 					writefile.writelines(lines+"\n")
@@ -1069,6 +1212,7 @@ def AttributesWindow():
 		if attributes.displayed_objects != []:
 			attributes.selected = attributes.displayed_objects[0]
 			attributes.selection()
+			attributes.settings()
 
 
 	def add_menu(event):
@@ -1080,7 +1224,7 @@ def AttributesWindow():
 	addattributebutton.bind("<Button-1>", add_menu)
 
 	addattributemenu = tk.Menu(root, tearoff=0)
-	addattributemenu.add_command(label="Gravity",font=("",15),command=lambda: add_attribute("gravity"))
+	addattributemenu.add_command(label="Gravity",font=("",15),command=lambda: add_attribute("Gravity"))
 	addattributemenu.add_command(label="Physics Object",font=("",15),command=lambda: add_attribute("PhysicsObject"))
 	addattributemenu.add_command(label="Camera Follow",font=("",15),command=lambda: add_attribute("camerafollow"))
 
