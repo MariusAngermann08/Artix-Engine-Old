@@ -68,31 +68,6 @@ menu_font = ("Arial", 12)
 menu_bar = tk.Menu(app, font=menu_font)
 app.config(menu=menu_bar)
 
-#adding a file menu into menubar
-file_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)
-menu_bar.add_cascade(label="File", menu=file_menu)
-file_menu.add_command(label="New Scene")
-file_menu.add_command(label="Save")
-file_menu.add_command(label="Save as")
-file_menu.add_command(label="Project Settings")
-file_menu.add_separator()
-file_menu.add_command(label="Project Manager", command=openprcmanager)
-file_menu.add_command(label="Quit", command=app.quit)
-
-#adding a edit menu into menubar
-edit_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)
-menu_bar.add_cascade(label="Edit", menu=edit_menu)
-edit_menu.add_command(label="Copy")
-edit_menu.add_command(label="Paste")
-edit_menu.add_command(label="Undo")
-edit_menu.add_command(label="Redo")
-edit_menu.add_command(label="Editor Settings")
-
-#adding a selection menu into menubar
-selection_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)
-menu_bar.add_cascade(label="Selection", menu=selection_menu)
-selection_menu.add_command(label="Select all")
-selection_menu.add_command(label="Clear Selection")
 
 #Creating the file Manager
 file_manager_frame = ctk.CTkFrame(app,750,230,fg_color="#172a38",border_color="#000000")
@@ -108,18 +83,42 @@ file_manager_label.pack()
 file_manager_label.place(relwidth=1,relheight=1)
 file_manager_label.lift()
 
+class Scene:
+	def __init__(self,name="untitled",link=[]):
+		self.name = name
+		self.link = link
+		self.objects = []
+		camera = self.Camera2D()
+		self.objects.append(camera)
+	def add_object(self, type="", name=""):
+		if type == "Sprite2D":
+			self.objects.append(self.Sprite2D(name=name))
+		scenetree.update()
+	class Camera2D:
+		def __init__(self):
+			self.pos = [0,0]
+			self.type = "Camera2D"
+	class Sprite2D:
+		def __init__(self, name="Untitled"):
+			self.name = name
+			self.type = "" 
 
 class FileManager:
 	def __init__(self):
 		self.menu = tk.Menu(app, tearoff=0)
 		self.menu.add_command(label="Delete", command=self.delete_file, font=("",15))
 		self.displayed_files = []
+		self.displayed_scenes = []
 		self.files_list = []
+		self.scenes_list = []
 		self.button_file_map = {}
 		self.FileLoader()
 		self.dragged = False
 		self.dragged_button = None
-
+		self.scene_table = {}
+	def secondinit(self, scenetree=None, viewport=None):
+		self.scenetreelink = scenetree
+		self.viewportlink = viewport
 
 	def FileLoader(self):
 		self.files_list.clear()
@@ -130,11 +129,27 @@ class FileManager:
 			line = lines.rstrip("\n")
 			self.files_list.append(line)
 
+		openfile = open("projects/"+project_name+"/scenes.txt", "r")
+		readfile = openfile.readlines()
+		openfile.close()
+		for lines in readfile:
+			value = lines.rstrip("\n")
+			if value != "":
+				self.scenes_list.append(value)
+
+	def open_scene(self, button):
+		
+		self.scenetreelink.general_update()
+		self.scenetreelink.update()
+		self.scenetreelink.load_scene(self.scene_table[button])
+		#self.viewportlink.update()
+		scenetree.select(scenetree.displayed_objects[0])
+
 	def display_files(self):
 		currentindex = 0
 		self.displayed_files = []
-		lastbuttonpos = []
-		lastlabelpos = []
+		lastbuttonpos = [-80,40]
+		lastlabelpos = [-88,110]
 		attempts = 0
 		numberinline = 0
 		newline = False
@@ -149,6 +164,17 @@ class FileManager:
 			self.displayed_files.append(testimg)
 			self.displayed_files.append(button)
 			self.displayed_files.append(name_label)
+		self.scenes_list = list(set(self.scenes_list))
+		for lines in self.scenes_list:
+			testimg = ctk.CTkImage(dark_image=Image.open("src/icons/scene_icon.png"),size=(50,60))
+			button = ctk.CTkButton(file_manager_frame, text="", image=testimg, width=50, height=60)
+			self.scene_table[button] = lines
+			button.bind("<Double-Button-1>", lambda event, button=button: self.open_scene(button))
+			name_label = ctk.CTkLabel(file_manager_frame, text=lines, fg_color="transparent")
+			self.displayed_scenes.append(button)
+			self.displayed_scenes.append(name_label)
+			print(self.scenes_list)
+
 		for objects in self.displayed_files:
 			if currentindex == 3:
 				currentindex = 0
@@ -186,7 +212,35 @@ class FileManager:
 					objects.place(x=lastlabelpos[0]+100,y=lastlabelpos[1],relwidth=0.12,relheight=0.07)
 					lastlabelpos = [lastlabelpos[0]+100,lastlabelpos[1]]
 			currentindex += 1
-	
+
+		attempts = 0
+		currentindex = 0
+		for objs in self.displayed_scenes:
+			if numberinline == 7:
+				newline = True
+				lastbuttonpos = [10,lastbuttonpos[1]+100]
+				lastlabelpos = [2,lastlabelpos[1]+100]
+			else:
+				newline = False
+
+			if currentindex == 2:
+				currentindex = 0
+				numberinline += 1
+
+			if currentindex == 0:
+				objs.pack(padx=0,pady=30)
+				objs.place(x=lastbuttonpos[0]+100,y=lastbuttonpos[1],relwidth=0.1,relheight=0.3)
+				lastbuttonpos = [lastbuttonpos[0]+100,lastbuttonpos[1]]
+			elif currentindex == 1:
+				objs.pack(padx=0,pady=30)
+				objs.place(x=lastlabelpos[0]+100,y=lastlabelpos[1],relwidth=0.12,relheight=0.07)
+				lastlabelpos = [lastlabelpos[0]+100,lastlabelpos[1]]
+
+			currentindex += 1
+
+			
+
+
 
 	def update(self):
 		currentindex = 0
@@ -198,7 +252,10 @@ class FileManager:
 				continue
 			objects.destroy()
 			currentindex += 1
+		for objects in self.displayed_scenes:
+			objects.destroy()
 		self.displayed_files.clear()
+		self.displayed_scenes.clear()
 		self.FileLoader()
 		self.display_files()
 
@@ -349,6 +406,12 @@ class SceneTree:
 			self.registeredscenes.append(lines.rstrip("\n"))
 
 	def load_scene(self, name=""):
+		for objects in self.displayed_objects:
+			objects.destroy()
+			print("destroyed")
+		self.displayed_objects.clear()
+
+
 		search = 0
 		self.currentscene = name
 		currentscene = name
@@ -394,6 +457,7 @@ class SceneTree:
 		canvas_width = scenetreecanvas.winfo_width()
 		canvas_height = lastpos[1] + 60
 		scenetreecanvas.configure(scrollregion=(0, 0, canvas_width, canvas_height))
+
 
 	def select(self, object1=None, name="Camera2D", param="no"):
 
@@ -467,25 +531,7 @@ class SceneTree:
 		self.menu.entryconfig(0, command=lambda: self.delete_object(objects))
 		self.menu.post(event.x_root, event.y_root)
 
-class Scene:
-	def __init__(self,name="untitled",link=[]):
-		self.name = name
-		self.link = link
-		self.objects = []
-		camera = self.Camera2D()
-		self.objects.append(camera)
-	def add_object(self, type="", name=""):
-		if type == "Sprite2D":
-			self.objects.append(self.Sprite2D(name=name))
-		scenetree.update()
-	class Camera2D:
-		def __init__(self):
-			self.pos = [0,0]
-			self.type = "Camera2D"
-	class Sprite2D:
-		def __init__(self, name="Untitled"):
-			self.name = name
-			self.type = "" 
+
 
 
 def add_sprite():
@@ -891,7 +937,7 @@ class Viewport:
 				currentindex += 1
 				continue
 
-			
+			print(scenes)
 			print("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+objs.name+".config")
 			if objs.name != "":
 				openfile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+objs.name.rstrip("\n")+".config", "r")
@@ -958,6 +1004,8 @@ scenetree = SceneTree(link=scenes,general_update=general_update,properties1=prop
 viewport = Viewport(scenetree)
 properties_panel.assign(viewport)
 viewport.secondinit(properties_panel)
+
+fm.secondinit(scenetree, viewport)
 
 def AttributesWindow():
 	if scenetree.selected_name == "Camera2D":
@@ -1049,7 +1097,6 @@ def AttributesWindow():
 			delete_menu = tk.Menu(root, tearoff=0)
 			delete_menu.add_command(label="Delete", font=("", 15), command=lambda: self.delete_attribute(button))
 			delete_menu.post(root.winfo_pointerx(), root.winfo_pointery())
-
 
 		def delete_attribute(self, button):
 			type1 = self.button_map[button]
@@ -1260,6 +1307,70 @@ def on_left_button_release(event):
 
 app.bind("<ButtonRelease-1>", on_left_button_release)
 
+def new_scene():
+	dialog = ctk.CTkInputDialog(text="Scene Name:", title="New Scene")
+	value = dialog.get_input()
+	if value != "":
+		openfile = open("projects/"+project_name+"/scenes.txt", "r")
+		readfile = openfile.readlines()
+		openfile.close()
+		objecttemp = []
+		for lines in readfile:
+			objecttemp.append(lines.rstrip("\n"))
+		objecttemp.append(value)
+		writefile = open("projects/"+project_name+"/scenes.txt", "w")
+		currentindex = 0
+		for lines in objecttemp:
+			if currentindex != (len(objecttemp)-1):
+				writefile.writelines(lines+"\n")
+			else:
+				writefile.writelines(lines)
+		writefile.close()
+
+		with open("projects/"+project_name+"/Scenes/"+value+".txt", "w") as f:
+			f.write("")
+
+		directory_path = "projects/"+project_name+"/Scenes/"+value
+		os.makedirs(directory_path, exist_ok=True)
+
+		cameraconfig = ["#TRANSFORM","0","0","#BGCOLOR","#ffffff"]
+		with open(directory_path+"/Camera2D.config", "w") as f:
+			for lines in cameraconfig:
+				f.write(lines+"\n")
+
+		fm.update()
+
+
+
+
+		
+
+
+#adding a file menu into menubar
+file_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)
+file_menu.add_command(label="New Scene", command=new_scene)
+menu_bar.add_cascade(label="File", menu=file_menu)
+file_menu.add_command(label="Save")
+file_menu.add_command(label="Save as")
+file_menu.add_command(label="Project Settings")
+file_menu.add_separator()
+file_menu.add_command(label="Project Manager", command=openprcmanager)
+file_menu.add_command(label="Quit", command=app.quit)
+
+#adding a edit menu into menubar
+edit_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)
+menu_bar.add_cascade(label="Edit", menu=edit_menu)
+edit_menu.add_command(label="Copy")
+edit_menu.add_command(label="Paste")
+edit_menu.add_command(label="Undo")
+edit_menu.add_command(label="Redo")
+edit_menu.add_command(label="Editor Settings")
+
+#adding a selection menu into menubar
+selection_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)
+menu_bar.add_cascade(label="Selection", menu=selection_menu)
+selection_menu.add_command(label="Select all")
+selection_menu.add_command(label="Clear Selection")
 
 
 properties_apply_button = ctk.CTkButton(properties_panel_heading, text="Apply", fg_color="#5f9467", font=("",20), command=properties_panel.apply)
