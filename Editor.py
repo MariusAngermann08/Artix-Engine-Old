@@ -911,8 +911,6 @@ class Viewport:
 		old_x = int(x)
 		old_y = int(y)
 
-		new_x = (old_x / old_width) * new_width
-		new_y = (old_y / old_height) * new_height
 
 		openfile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+name+".config", "r")
 		readfile = openfile.readlines()
@@ -921,8 +919,8 @@ class Viewport:
 		for lines in readfile:
 			objecttemp.append(lines.rstrip("\n"))
 
-		objecttemp[1] = str(new_x)
-		objecttemp[2] = str(new_y)
+		objecttemp[1] = str(old_x)
+		objecttemp[2] = str(old_y)
 
 		writefile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+name+".config", "w")
 		for lines in objecttemp:
@@ -1008,8 +1006,8 @@ class Viewport:
 			x_scale = editor_width / game_width
 			y_scale = editor_height / game_height
 
-			editor_x = game_x * x_scale
-			editor_y = game_y * y_scale
+			editor_x = game_x
+			editor_y = game_y
 
 			print("there")
 			if objecttemp[6] == "none": 

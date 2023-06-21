@@ -63,19 +63,52 @@ class Export:
 
 				scalex = int(objecttemp[3])
 				scaley = int(objecttemp[4])
-				posx = int(float(objecttemp[1])) + 60
+				posx = int(float(objecttemp[1]))
 				posy = int(float(objecttemp[2]))
 
-				value = objs+".transform.scale.x = "+str(scalex)+"\n"
+				canvaswidth = 1100
+				canvasheight = 630
+				windowwidth = 800
+				windowheight = 600
+
+				xfactor = windowwidth / canvaswidth
+				yfactor = windowheight / canvasheight
+
+				fscalex = scalex * xfactor
+				fscaley = scaley * yfactor
+				fposx = posx * xfactor - fscalex / 2
+				fposy = posy * yfactor
+				
+
+				value = objs+".transform.scale.x = "+str(fscalex)+"\n"
 				self.exportfile.append(value)
-				value = objs+".transform.scale.y = "+str(scaley)+"\n"
+				value = objs+".transform.scale.y = "+str(fscaley)+"\n"
 				self.exportfile.append(value)
-				value = objs+".transform.position.x = "+str(posx)+"\n"
+				value = objs+".transform.position.x = "+str(fposx)+"\n"
 				self.exportfile.append(value)
-				value = objs+".transform.position.y = "+str(posy)+"\n"
+				value = objs+".transform.position.y = "+str(fposy)+"\n"
 				self.exportfile.append(value)
 				value = self.scenes[currentindex]+".game_objects.append("+objs+")\n"
 				self.exportfile.append(value)
+
+				if objecttemp[8] != "none":
+					single = objecttemp[8].split(",")
+					print(objecttemp[8])
+					print(single)
+					static = "False"
+					if single[0] == "True":
+						static = "True"
+					else:
+						static = "False"
+					mass = single[1]
+					inertia = single[2]
+					value = objs+".attributes.attributes.append("+objs+".attributes.PhysicsObject(position=("+str(fposx)+","+str(fposy)+"),static="+static+",own_size=("+str(fscalex* 1.6)+","+str(fscaley)+"), space_path="+self.scenes[currentindex]+".space, mass="+mass+",inertia="+inertia+"))\n"
+					self.exportfile.append(value)
+					value = objs+".attributes.attribute_names.append(\"PhysicsObject\")\n"
+					self.exportfile.append(value)
+
+
+
 
 				self.exportfile.append("\n")
 			currentindex += 1
