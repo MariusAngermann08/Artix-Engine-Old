@@ -26,6 +26,7 @@ import shutil
 import subprocess
 import sys
 import re
+from Export import Export
 
 
 openfile = open("prcopen.info", "r")
@@ -138,12 +139,11 @@ class FileManager:
 				self.scenes_list.append(value)
 
 	def open_scene(self, button):
+		self.scenetreelink.general_update("load",self.scene_table[button])
+		self.scenetreelink.select(self.scenetreelink.displayed_objects[0])
+		self.viewportlink.update()
+		#name1=self.scene_table[button]
 		
-		self.scenetreelink.general_update()
-		self.scenetreelink.update()
-		self.scenetreelink.load_scene(self.scene_table[button])
-		#self.viewportlink.update()
-		scenetree.select(scenetree.displayed_objects[0])
 
 	def display_files(self):
 		currentindex = 0
@@ -364,10 +364,16 @@ hbar.place(x=250,y=30,relheight=0.93)
 scenetreecanvas.configure(yscrollcommand=hbar.set)
 hbar.configure(command=scenetreecanvas.yview)
 
-def general_update(preset="startup"):
+def general_update(preset="startup",name1=""):
 	scenes.clear()
-	print("general")
 	currentindex = 0
+	scenetree.registeredscenes.clear()
+	openfile = open("projects/"+project_name+"/scenes.txt", "r")
+	readfile = openfile.readlines()
+	openfile.close()
+	for lines in readfile:
+		scenetree.registeredscenes.append(lines.rstrip("\n"))
+	scenes.clear()
 	for i in scenetree.registeredscenes:
 		scenetemp = Scene(i,link=scenes)
 		scenes.append(scenetemp)
@@ -381,10 +387,11 @@ def general_update(preset="startup"):
 		currentindex += 1
 	if preset == "startup":
 		scenetree.load_scene(scenetree.registeredscenes[0])
+	elif preset == "load":
+		scenetree.load_scene(name1)
 	else:
 		scenetree.load_scene(scenetree.currentscene)
 
-	print(scenes[0].objects)
 
 class SceneTree:
 	def __init__(self,link=[],general_update=[],properties1=[]):
@@ -779,7 +786,40 @@ class Properties:
 			self.displayed_objects[6].configure(fg_color=self.bg_color)
 
 def build_game():
-	pass
+	def copy_files(source_dir, destination_dir):
+		file_list = os.listdir(source_dir)
+		for file_name in file_list:
+			source_path = os.path.join(source_dir, file_name)
+			destination_path = os.path.join(destination_dir, file_name)
+			shutil.copy2(source_path, destination_path)
+
+	try:
+		os.remove("projects/"+project_name+"/build")
+	except:
+		pass
+	directory_path = "projects/"+project_name+"/build"
+	os.makedirs(directory_path, exist_ok=True)
+
+	directory_path = "projects/"+project_name+"/build/src"
+	os.makedirs(directory_path, exist_ok=True)
+
+	copy_files("projects/"+project_name+"/Files", "projects/"+project_name+"/build/src")
+	shutil.copy2("Engine.py", "projects/"+project_name+"/build")
+
+	exporter = Export(project_name)
+	exporter.build()
+
+	relative_path = "projects/"+project_name+"/build/main.py"
+	absolute_path = os.path.abspath(relative_path)
+	file_dir = os.path.dirname(absolute_path)
+
+	subprocess.Popen(['python', absolute_path], cwd=file_dir)
+
+
+
+
+
+
 
 
 viewport_canvas = ctk.CTkCanvas(app,width=1100,height=630)
@@ -907,7 +947,7 @@ class Viewport:
 	def secondinit(self, propertieslink=None):
 		self.properties = propertieslink
 
-	def update(self):
+	def update(self, name1=""):
 		for objects in self.displayed_objects:
 			objects.destroy()
 		self.displayed_objects.clear()
@@ -924,13 +964,16 @@ class Viewport:
 
 		searched = 0
 		for differentscenes in scenes:
-			if differentscenes.name == self.scenetreelink.currentscene:
-				searched = scenes.index(differentscenes)
-				break
+			if name1 == "":
+				if differentscenes.name == self.scenetreelink.currentscene:
+					searched = scenes.index(differentscenes)
+					break
+			else:
+				print(name1)
+				if differentscenes.name == name1:
+					searched = scenes.index(differentscenes)
+					break
 		currentindex = 0
-		for objs in scenes[searched].objects:
-			if objs.type != "Camera2D":
-				print(objs.name)
 		gap = False
 		for objs in scenes[searched].objects:
 			if currentindex == 0:
@@ -941,7 +984,6 @@ class Viewport:
 			print("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+objs.name+".config")
 			if objs.name != "":
 				openfile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+objs.name.rstrip("\n")+".config", "r")
-				print("opened")
 			else:
 				continue
 			

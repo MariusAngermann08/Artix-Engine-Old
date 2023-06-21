@@ -97,11 +97,7 @@ class Export:
 
 
 		#creating the exported file
-		writefile = open("library/test/build.py", "w")
+		writefile = open("projects/"+self.project_name+"/build/main.py", "w")
 		for lines in self.exportfile:
 			writefile.writelines(lines)
 		writefile.close()
-
-
-build = Export("NicksGame")
-build.build()
