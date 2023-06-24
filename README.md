@@ -28,10 +28,11 @@ To install Artix Engine and its dependencies, follow these steps:
 
 2. Open a terminal or command prompt.
 
-3. Run the following command to install the required Python dependencies: ```pip install pygame tkinter customtkinter pymunk pillow```
+3. Run the following command to install the required Python dependencies: 
 
+For windows users: ```pip install pygame tkinter customtkinter pymunk pillow```
 
-Note: The command includes `tkinter` as a dependency, as it may not be installed by default on some Linux distributions.
+For linux users: ```pip install pygame customtkinter pymunk pillow``` and ```apt-get install python-tk```
 
 4. Download Artix Engine from the repository or source of distribution.
 
@@ -46,7 +47,6 @@ Note: The command includes `tkinter` as a dependency, as it may not be installed
 2. Navigate to the directory where you extracted Artix Engine.
 
 3. Run the following command to start the engine: ```python main.py```
-
 
 4. The project manager will launch, over wich you can access the Editor, providing you with a visual interface to create and manage your games.
 
