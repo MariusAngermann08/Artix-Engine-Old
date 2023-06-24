@@ -43,6 +43,8 @@ class Export:
 		currentindex = 0
 		for scenes in self.objects:
 			self.exportfile.append(self.scenes[currentindex]+" = engine.Scene(\""+self.scenes[currentindex]+"\", 60, engine.screen)\n")
+			self.exportfile.append("engine.scenes.append("+self.scenes[currentindex]+")\n")
+
 			for objs in self.objects[currentindex]:
 				#read the config
 				openfile = open("projects/"+self.project_name+"/Scenes/"+self.scenes[currentindex]+"/"+objs+".config", "r")
@@ -102,7 +104,7 @@ class Export:
 						static = "False"
 					mass = single[1]
 					inertia = single[2]
-					value = objs+".attributes.attributes.append("+objs+".attributes.PhysicsObject(position=("+str(fposx)+","+str(fposy)+"),static="+static+",own_size=("+str(fscalex* 1.6)+","+str(fscaley)+"), space_path="+self.scenes[currentindex]+".space, mass="+mass+",inertia="+inertia+"))\n"
+					value = objs+".attributes.attributes.append("+objs+".attributes.PhysicsObject("+objs+",position=("+str(fposx)+","+str(fposy)+"),static="+static+",own_size=("+str(fscalex* 1.6)+","+str(fscaley)+"), space_path="+self.scenes[currentindex]+".space, mass="+mass+",inertia="+inertia+"))\n"
 					self.exportfile.append(value)
 					value = objs+".attributes.attribute_names.append(\"PhysicsObject\")\n"
 					self.exportfile.append(value)
@@ -123,7 +125,7 @@ class Export:
 		self.exportfile.append("			sys.exit()\n")
 		self.exportfile.append("		if event.type == pygame.KEYDOWN:\n")
 		self.exportfile.append("			events.append(event)\n")
-		self.exportfile.append("	DefaultScene.render(events)\n")
+		self.exportfile.append("	engine.run(events)\n")
 		#self.exportfile.append("\n")
 		#self.exportfile.append("\n")
 		#self.exportfile.append("\n")

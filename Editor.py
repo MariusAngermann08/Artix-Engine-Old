@@ -333,12 +333,7 @@ file_manager_button.place(relwidth=0.2,relheight=1)
 
 
 
-def EventSystemWindow():
-	root = ctk.CTk()
-	root.geometry("800x600")
-	root.title("Event System")
-	root.iconbitmap("src/icon.ico")
-	root.mainloop()
+
 
 scenetreeframe = ctk.CTkFrame(app,width=265,height=420,border_width=0,fg_color="#666666")
 scenetreeframe.pack()
@@ -565,6 +560,8 @@ def add_sprite():
 	with open("projects/"+project_name+"/Scenes/"+scenetree.currentscene+"/"+value+".config", "w") as f:
 		for lines in spriteconfig:
 			f.write(lines+"\n")
+	with open("projects/"+project_name+"/Scenes/"+scenetree.currentscene+"/"+value+".es", "w") as f:
+		f.write("")
 	scenetree.update()
 
 
@@ -825,9 +822,6 @@ def build_game():
 viewport_canvas = ctk.CTkCanvas(app,width=1100,height=630)
 viewport_canvas.place(x=415,y=5)
 
-event_system_button = ctk.CTkButton(viewport_canvas,text="Event System",corner_radius=0, fg_color="#5f6670", font=("",20),command=EventSystemWindow)
-event_system_button.place(x=0,y=0,relwidth=0.2,relheight=0.1)
-
 play_button = ctk.CTkButton(viewport_canvas,text="Play",command=build_game,corner_radius=0, fg_color="#49bf51", font=("",20))
 play_button.place(x=625,y=0,relwidth=0.15,relheight=0.1)
 
@@ -1046,6 +1040,149 @@ properties_panel.assign(viewport)
 viewport.secondinit(properties_panel)
 
 fm.secondinit(scenetree, viewport)
+
+def EventSystemWindow():
+	if scenetree.selected_name == "Camera2D":
+		messagebox.showwarning("Warning", "Camera2D cant have Event System")
+		return True
+	root = ctk.CTk()
+	root.geometry("800x600")
+	root.title("Event System")
+	root.iconbitmap("src/icon.ico")
+	shown_widgets = []
+
+
+	class Event_OR_Action:
+		def __init__(self, own_type="event", parameter1="keypress",evindex=0):
+			self.displayed_objects = []
+			self.type = own_type
+			self.param = parameter1
+			if self.type == "event":
+				self.event_index = evindex
+				self.create_event()
+			
+		def create_event(self):
+			self.frame = ctk.CTkFrame(root, width=400,height=35,fg_color="#525252")
+			self.frame.place(x=30,y=60)
+			self.displayed_objects.append(self.frame)
+			if self.type == "event":
+				evtype = "KEYPRESS"
+				if self.param == "keypress":
+					evtype = "KEYPRESS"
+				elif self.param == "keyhold":
+					evtype = "KEYHOLD"
+				elif self.param == "colwith":
+					evtype = "COLLISION WITH"
+				label = ctk.CTkLabel(self.frame, text="Event: "+evtype,font=("",19))
+				if self.param == "colwith":
+					label.place(x=0,y=2,relwidth=0.6,relheight=0.9)
+				else:
+					label.place(x=10,y=2,relwidth=0.4,relheight=0.9)
+				if self.param == "keypress" or self.param == "keyhold":
+					self.optionmenu1 = ctk.CTkOptionMenu(self.frame,fg_color="#878787",button_color="#333333", values=['Space', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'])
+					self.optionmenu1.place(x=190,y=2.5,relwidth=0.2,relheight=0.8)
+					self.displayed_objects.append(self.optionmenu1)
+				if self.param == "colwith":
+					searched_object = scenetree.selected_name
+					scene = scenetree.currentscene
+					openfile = open("projects/"+project_name+"/Scenes/"+scene+".txt", "r")
+					readfile = openfile.readlines()
+					openfile.close()
+					objecttemp = []
+					for lines in readfile:
+						value = lines.rstrip("\n")
+						if value != "":
+							objecttemp.append(value)
+					try:
+						objecttemp.remove(searched_object)
+					except:
+						pass
+
+					self.optionmenu1 = ctk.CTkOptionMenu(self.frame,fg_color="#878787",button_color="#333333", values=objecttemp)
+					self.optionmenu1.place(x=270,y=2.5,relwidth=0.2,relheight=0.8)
+					self.displayed_objects.append(self.optionmenu1)
+
+			self.del_button = ctk.CTkButton(self.frame, fg_color="#ff4040",text="X", font=("",19))
+			self.del_button.place(x=367.5,y=1,relwidth=0.08,relheight=0.9)
+			self.displayed_objects.append(self.del_button)
+
+		def create_action(self):
+			pass
+
+	a = Event_OR_Action("event","colwith",0)
+
+	def load_system():
+		searched_object = scenetree.selected_name
+		scene = scenetree.currentscene
+		openfile = openfile = open("projects/"+project_name+"/Scenes/"+scene+"/"+searched_object+".es", "r")
+		readfile = openfile.readlines()
+		openfile.close()
+		objecttemp = []
+		for lines in readfile:
+			value = lines.rstrip("\n")
+			if value != "":
+				objecttemp.append(value)
+
+		eventindex = 0
+		for i in objecttemp:
+			initial = i.split("+")
+			if initial[0] == "event":
+				pass
+
+
+
+	def add_event(searched_type=""):
+		if searched_type != "":
+			searched_object = scenetree.selected_name
+			scene = scenetree.currentscene
+			openfile = open("projects/"+project_name+"/Scenes/"+scene+"/"+searched_object+".es", "r")
+			readfile = openfile.readlines()
+			openfile.close()
+			objecttemp = []
+			for lines in readfile:
+				value = lines.rstrip("\n")
+				if value != "":
+					objecttemp.append(value)
+			if searched_type == "keypress":
+				objecttemp.append("event+keypress+space")
+			elif searched_type == "keyhold":
+				objecttemp.append("event+keyhold+space")
+			elif searched_type == "colwith":
+				objecttemp.append("event+colwith+empty")
+			elif searched_type == "colbtw":
+				objecttemp.append("event+colbtw+empty+empty")
+			writefile = open("projects/"+project_name+"/Scenes/"+scene+"/"+searched_object+".es", "w")
+			for i in objecttemp:
+				writefile.writelines(i+"\n")
+
+	def add_menu(event):
+		addeventmenu.post(addeventbutton.winfo_rootx(), addeventbutton.winfo_rooty() + addeventbutton.winfo_height())
+
+
+	addeventbutton = ctk.CTkButton(root, text="Add Event", fg_color="#5f9467", font=("",20))
+	addeventbutton.pack()
+	addeventbutton.place(x=5,y=5,relwidth=0.3,relheight=0.1)
+	addeventbutton.bind("<Button-1>", add_menu)
+
+	addeventmenu = tk.Menu(root, tearoff=0)
+	addeventmenu.add_separator()
+	addeventmenu.add_command(label="Keypress",font=("",15),command=lambda: add_event("keypress"))
+	addeventmenu.add_separator()
+	addeventmenu.add_command(label="Keyhold",font=("",15),command=lambda: add_event("keyhold"))
+	addeventmenu.add_separator()
+	addeventmenu.add_command(label="Collision with",font=("",15),command=lambda: add_event("colwith"))
+	addeventmenu.add_separator()
+	addeventmenu.add_command(label="Collision between",font=("",15),command=lambda: add_event("colbtw"))
+
+	apply_button = ctk.CTkButton(root, text="Apply", fg_color="#5f9467", font=("",20))
+	apply_button.place(x=449,y=5,relwidth=0.15,relheight=0.1)
+
+	root.mainloop()
+
+
+
+event_system_button = ctk.CTkButton(viewport_canvas,text="Event System",corner_radius=0, fg_color="#5f6670", font=("",20),command=EventSystemWindow)
+event_system_button.place(x=0,y=0,relwidth=0.2,relheight=0.1)
 
 def AttributesWindow():
 	if scenetree.selected_name == "Camera2D":
