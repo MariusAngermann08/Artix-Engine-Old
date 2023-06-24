@@ -63,10 +63,7 @@ Artix Engine is licensed under the GNU General Public License v3.0 (GPL-3.0). Yo
 The Artix Engine project would like to acknowledge the following libraries and frameworks that have been instrumental in its development:
 
 - Pygame: [https://www.pygame.org/](https://www.pygame.org/)
-- 
 - tkinter: [https://docs.python.org/3/library/tkinter.html](https://docs.python.org/3/library/tkinter.html)
-- 
 - customtkinter: [https://customtkinter.tomschimansky.com/](https://customtkinter.tomschimansky.com/)
-- 
--Pymunk: [https://www.pymunk.org/en/latest/index.html](https://www.pymunk.org/en/latest/index.html)
+- Pymunk: [https://www.pymunk.org/en/latest/index.html](https://www.pymunk.org/en/latest/index.html)
 
