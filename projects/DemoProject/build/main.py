@@ -15,10 +15,10 @@ Player = DefaultScene.GameObject("Player", "Sprite", False)
 Player.add_property("texture", "src/blue.png")
 Player.transform.scale.x = 109.0909090909091
 Player.transform.scale.y = 123.8095238095238
-Player.transform.position.x = 127.27272727272727
-Player.transform.position.y = 79.04761904761904
+Player.transform.position.x = 96.72727272727273
+Player.transform.position.y = 69.52380952380952
 DefaultScene.game_objects.append(Player)
-Player.attributes.attributes.append(Player.attributes.PhysicsObject(Player,position=(127.27272727272727,79.04761904761904),static=False,own_size=(174.54545454545456,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
+Player.attributes.attributes.append(Player.attributes.PhysicsObject(Player,position=(96.72727272727273,69.52380952380952),static=False,own_size=(174.54545454545456,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
 Player.attributes.attribute_names.append("PhysicsObject")
 
 floor = DefaultScene.GameObject("floor", "Sprite", False)
@@ -35,10 +35,10 @@ secondfloor = DefaultScene.GameObject("secondfloor", "Sprite", False)
 secondfloor.add_property("texture", "src/ground.png")
 secondfloor.transform.scale.x = 181.8181818181818
 secondfloor.transform.scale.y = 123.8095238095238
-secondfloor.transform.position.x = 508.3636363636364
-secondfloor.transform.position.y = 426.66666666666663
+secondfloor.transform.position.x = 518.5454545454546
+secondfloor.transform.position.y = 396.19047619047615
 DefaultScene.game_objects.append(secondfloor)
-secondfloor.attributes.attributes.append(secondfloor.attributes.PhysicsObject(secondfloor,position=(508.3636363636364,426.66666666666663),static=True,own_size=(290.90909090909093,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
+secondfloor.attributes.attributes.append(secondfloor.attributes.PhysicsObject(secondfloor,position=(518.5454545454546,396.19047619047615),static=True,own_size=(290.90909090909093,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
 secondfloor.attributes.attribute_names.append("PhysicsObject")
 
 while True:

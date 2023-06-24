@@ -1053,18 +1053,38 @@ def EventSystemWindow():
 
 
 	class Event_OR_Action:
-		def __init__(self, own_type="event", parameter1="keypress",evindex=0):
+		def __init__(self, own_type="event", parameter1="keypress",evindex=0, lastframepos=60):
 			self.displayed_objects = []
+			self.lastframepos = lastframepos
 			self.type = own_type
 			self.param = parameter1
 			if self.type == "event":
 				self.event_index = evindex
 				self.create_event()
-			
+			if self.type == "action":
+				self.event_index = evindex
+				self.create_action()
+		def add_menu(self,event):
+			self.addactionmenu.post(self.plus_button.winfo_rootx(), self.plus_button.winfo_rooty() + self.plus_button.winfo_height())
+	
 		def create_event(self):
-			self.frame = ctk.CTkFrame(root, width=400,height=35,fg_color="#525252")
-			self.frame.place(x=30,y=60)
+			self.frame = ctk.CTkFrame(root, width=475,height=35,fg_color="#525252")
+			self.frame.place(x=30,y=self.lastframepos)
 			self.displayed_objects.append(self.frame)
+			self.addactionmenu = tk.Menu(root, tearoff=0)
+			self.addactionmenu.add_separator()
+			self.addactionmenu.add_command(label="Set Position",font=("",15))
+			self.addactionmenu.add_separator()
+			self.addactionmenu.add_command(label="Move",font=("",15))
+			self.addactionmenu.add_separator()
+			self.addactionmenu.add_command(label="Set Object Position",font=("",15))
+			self.addactionmenu.add_separator()
+			self.addactionmenu.add_command(label="Move Object",font=("",15))
+			self.addactionmenu.add_separator()
+			self.addactionmenu.add_command(label="Apply Force",font=("",15))
+			self.addactionmenu.add_separator()
+			self.addactionmenu.add_command(label="Load Scene",font=("",15))
+		
 			if self.type == "event":
 				evtype = "KEYPRESS"
 				if self.param == "keypress":
@@ -1073,16 +1093,19 @@ def EventSystemWindow():
 					evtype = "KEYHOLD"
 				elif self.param == "colwith":
 					evtype = "COLLISION WITH"
+				elif self.param == "colbtw":
+					evtype = "COLLISION"
 				label = ctk.CTkLabel(self.frame, text="Event: "+evtype,font=("",19))
 				if self.param == "colwith":
-					label.place(x=0,y=2,relwidth=0.6,relheight=0.9)
+					label.place(x=-30,y=2,relwidth=0.6,relheight=0.9)
 				else:
-					label.place(x=10,y=2,relwidth=0.4,relheight=0.9)
+					label.place(x=-10,y=2,relwidth=0.4,relheight=0.9)
+
 				if self.param == "keypress" or self.param == "keyhold":
 					self.optionmenu1 = ctk.CTkOptionMenu(self.frame,fg_color="#878787",button_color="#333333", values=['Space', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'])
 					self.optionmenu1.place(x=190,y=2.5,relwidth=0.2,relheight=0.8)
 					self.displayed_objects.append(self.optionmenu1)
-				if self.param == "colwith":
+				elif self.param == "colwith":
 					searched_object = scenetree.selected_name
 					scene = scenetree.currentscene
 					openfile = open("projects/"+project_name+"/Scenes/"+scene+".txt", "r")
@@ -1097,21 +1120,127 @@ def EventSystemWindow():
 						objecttemp.remove(searched_object)
 					except:
 						pass
+				elif self.param == "colbtw":
+					searched_object = scenetree.selected_name
+					scene = scenetree.currentscene
+					openfile = open("projects/"+project_name+"/Scenes/"+scene+".txt", "r")
+					readfile = openfile.readlines()
+					openfile.close()
+					objecttemp = []
+					for lines in readfile:
+						value = lines.rstrip("\n")
+						if value != "":
+							objecttemp.append(value)
 
 					self.optionmenu1 = ctk.CTkOptionMenu(self.frame,fg_color="#878787",button_color="#333333", values=objecttemp)
-					self.optionmenu1.place(x=270,y=2.5,relwidth=0.2,relheight=0.8)
+					self.optionmenu1.place(x=175,y=2.5,relwidth=0.2,relheight=0.8)
 					self.displayed_objects.append(self.optionmenu1)
 
+					self.optionmenu2 = ctk.CTkOptionMenu(self.frame,fg_color="#878787",button_color="#333333", values=objecttemp)
+					self.optionmenu2.place(x=275,y=2.5,relwidth=0.2,relheight=0.8)
+					self.displayed_objects.append(self.optionmenu2)
+
+			self.plus_button = ctk.CTkButton(self.frame, fg_color="#65a36d",text="+", font=("",20))
+			self.plus_button.place(x=380,y=1,relwidth=0.09,relheight=0.9)
+			self.displayed_objects.append(self.plus_button)
+			self.plus_button.bind("<Button-1>", self.add_menu)
+
 			self.del_button = ctk.CTkButton(self.frame, fg_color="#ff4040",text="X", font=("",19))
-			self.del_button.place(x=367.5,y=1,relwidth=0.08,relheight=0.9)
+			self.del_button.place(x=435,y=1,relwidth=0.08,relheight=0.9)
 			self.displayed_objects.append(self.del_button)
 
 		def create_action(self):
-			pass
+			self.frame = ctk.CTkFrame(root, width=430,height=35,fg_color="#094e4f")
+			self.frame.place(x=75,y=self.lastframepos)
 
-	a = Event_OR_Action("event","colwith",0)
+			evtype = "move"
+			if self.param == "setpos":
+				evtype = "Set Position"
+			elif self.param == "move":
+				evtype = "Move"
+			elif self.param == "setobjpos":
+				evtype = "Set OBJ Position"
+			elif self.param == "moveobj":
+				evtype = "Move Object"
+			elif self.param == "applyforce":
+				evtype = "Apply Force"
+			elif self.param == "loadscene":
+				evtype = "Load Scene"
+
+			if self.param == "setpos" or self.param == "move":
+				self.xlabel = ctk.CTkLabel(self.frame, text="X:",font=("",18))
+				self.xlabel.place(x=150,y=3.5)
+				self.displayed_objects.append(self.xlabel)
+				self.xentry = ctk.CTkEntry(self.frame)
+				self.xentry.insert(0, "0")
+				self.xentry.place(x=175,y=2,relwidth=0.1,relheight=0.9)
+				self.displayed_objects.append(self.xentry)
+				self.ylabel = ctk.CTkLabel(self.frame, text="Y:",font=("",18))
+				self.ylabel.place(x=230,y=3.5)
+				self.displayed_objects.append(self.ylabel)
+				self.yentry = ctk.CTkEntry(self.frame)
+				self.yentry.insert(0, "0")
+				self.yentry.place(x=255,y=2,relwidth=0.1,relheight=0.9)
+				self.displayed_objects.append(self.yentry)
+			elif self.param == "setobjpos" or self.param == "moveobj" or self.param == "applyforce":
+				searched_object = scenetree.selected_name
+				scene = scenetree.currentscene
+				openfile = open("projects/"+project_name+"/Scenes/"+scene+".txt", "r")
+				readfile = openfile.readlines()
+				openfile.close()
+				objecttemp = []
+				for lines in readfile:
+					value = lines.rstrip("\n")
+					if value != "":
+						objecttemp.append(value)
+				self.optionmenu1 = ctk.CTkOptionMenu(self.frame, fg_color="#878787", button_color="#333333", values=objecttemp)
+				self.optionmenu1.place(x=150, y=2.5, relwidth=0.2, relheight=0.8)
+				self.displayed_objects.append(self.optionmenu1)
+				self.xlabel = ctk.CTkLabel(self.frame, text="X:", font=("", 18))
+				self.xlabel.place(x=245, y=3.5)
+				self.displayed_objects.append(self.xlabel)
+				self.xentry = ctk.CTkEntry(self.frame)
+				self.xentry.insert(0, "0")
+				self.xentry.place(x=270, y=2, relwidth=0.1, relheight=0.9)
+				self.displayed_objects.append(self.xentry)
+				self.ylabel = ctk.CTkLabel(self.frame, text="Y:", font=("", 18))
+				self.ylabel.place(x=325, y=3.5)
+				self.displayed_objects.append(self.ylabel)
+				self.yentry = ctk.CTkEntry(self.frame)
+				self.yentry.insert(0, "0")
+				self.yentry.place(x=350, y=2, relwidth=0.1, relheight=0.9)
+				self.displayed_objects.append(self.yentry)
+			elif self.param == "loadscene":
+				openfile = open("projects/"+project_name+"/scenes.txt", "r")
+				readfile = openfile.readlines()
+				openfile.close()
+				objecttemp = []
+				for lines in readfile:
+					value = lines.rstrip("\n")
+					if value != "":
+						objecttemp.append(value)
+				self.optionmenu1 = ctk.CTkOptionMenu(self.frame, fg_color="#878787", button_color="#333333", values=objecttemp)
+				self.optionmenu1.place(x=150, y=2.5, relwidth=0.4, relheight=0.8)
+				self.displayed_objects.append(self.optionmenu1)
+
+
+
+			self.label = ctk.CTkLabel(self.frame, text=evtype,font=("",19))
+			if self.param == "setobjpos":
+				self.label.place(x=-10,y=2,relwidth=0.375,relheight=0.8)
+			else:
+				self.label.place(x=-20,y=2,relwidth=0.375,relheight=0.8)
+			self.displayed_objects.append(self.label)
+
+			self.del_button = ctk.CTkButton(self.frame, fg_color="#ff4040",text="X", font=("",19))
+			self.del_button.place(x=395,y=1,relwidth=0.08,relheight=0.9)
+			self.displayed_objects.append(self.del_button)
+
 
 	def load_system():
+		for i in shown_widgets:
+			i.frame.destroy()
+		shown_widgets.clear()
 		searched_object = scenetree.selected_name
 		scene = scenetree.currentscene
 		openfile = openfile = open("projects/"+project_name+"/Scenes/"+scene+"/"+searched_object+".es", "r")
@@ -1122,12 +1251,21 @@ def EventSystemWindow():
 			value = lines.rstrip("\n")
 			if value != "":
 				objecttemp.append(value)
-
+		print(objecttemp)
+		lfp = 60
 		eventindex = 0
 		for i in objecttemp:
 			initial = i.split("+")
 			if initial[0] == "event":
-				pass
+				temp = Event_OR_Action("event",initial[1],eventindex,lfp)
+				shown_widgets.append(temp)
+				eventindex += 1
+				lfp += 45
+			elif initial[0] == "action":
+				temp = Event_OR_Action("action",initial[1],eventindex,lfp)
+				shown_widgets.append(temp)
+				lfp += 45
+
 
 
 
@@ -1154,10 +1292,12 @@ def EventSystemWindow():
 			writefile = open("projects/"+project_name+"/Scenes/"+scene+"/"+searched_object+".es", "w")
 			for i in objecttemp:
 				writefile.writelines(i+"\n")
+			writefile.close()
+			load_system()
+			
 
 	def add_menu(event):
 		addeventmenu.post(addeventbutton.winfo_rootx(), addeventbutton.winfo_rooty() + addeventbutton.winfo_height())
-
 
 	addeventbutton = ctk.CTkButton(root, text="Add Event", fg_color="#5f9467", font=("",20))
 	addeventbutton.pack()
@@ -1177,6 +1317,7 @@ def EventSystemWindow():
 	apply_button = ctk.CTkButton(root, text="Apply", fg_color="#5f9467", font=("",20))
 	apply_button.place(x=449,y=5,relwidth=0.15,relheight=0.1)
 
+	load_system()
 	root.mainloop()
 
 
