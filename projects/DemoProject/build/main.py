@@ -15,31 +15,75 @@ Player = DefaultScene.GameObject("Player", "Sprite", False)
 Player.add_property("texture", "src/blue.png")
 Player.transform.scale.x = 109.0909090909091
 Player.transform.scale.y = 123.8095238095238
-Player.transform.position.x = 96.72727272727273
-Player.transform.position.y = 69.52380952380952
+Player.transform.position.x = 37.81818181818181
+Player.transform.position.y = 180.95238095238093
 DefaultScene.game_objects.append(Player)
-Player.attributes.attributes.append(Player.attributes.PhysicsObject(Player,position=(96.72727272727273,69.52380952380952),static=False,own_size=(174.54545454545456,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
+Player.attributes.attributes.append(Player.attributes.PhysicsObject(Player,position=(37.81818181818181,180.95238095238093),static=False,own_size=(109.0909090909091,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
 Player.attributes.attribute_names.append("PhysicsObject")
+Player.eventsystem.root_node.append(Player.eventsystem.Event(Player,DefaultScene,"keypress","Space"))
+Player.eventsystem.root_node[0].actions.append(Player.eventsystem.Action(Player,DefaultScene,engine,"applyforce","0", "-20"))
+Player.eventsystem.root_node.append(Player.eventsystem.Event(Player,DefaultScene,"keyhold","a"))
+Player.eventsystem.root_node[1].actions.append(Player.eventsystem.Action(Player,DefaultScene,engine,"applyforce","-1", "0"))
+Player.eventsystem.root_node.append(Player.eventsystem.Event(Player,DefaultScene,"keyhold","d"))
+Player.eventsystem.root_node[2].actions.append(Player.eventsystem.Action(Player,DefaultScene,engine,"applyforce","1", "0"))
+Player.eventsystem.root_node.append(Player.eventsystem.Event(Player,DefaultScene,"colwith","lava"))
+Player.eventsystem.root_node[3].actions.append(Player.eventsystem.Action(Player,DefaultScene,engine,"setpos","127", "140"))
 
 floor = DefaultScene.GameObject("floor", "Sprite", False)
 floor.add_property("texture", "src/ground.png")
-floor.transform.scale.x = 363.6363636363636
+floor.transform.scale.x = 290.90909090909093
 floor.transform.scale.y = 123.8095238095238
-floor.transform.position.x = 42.90909090909091
-floor.transform.position.y = 486.66666666666663
+floor.transform.position.x = 16.72727272727272
+floor.transform.position.y = 339.04761904761904
 DefaultScene.game_objects.append(floor)
-floor.attributes.attributes.append(floor.attributes.PhysicsObject(floor,position=(42.90909090909091,486.66666666666663),static=True,own_size=(581.8181818181819,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
+floor.attributes.attributes.append(floor.attributes.PhysicsObject(floor,position=(16.72727272727272,339.04761904761904),static=True,own_size=(290.90909090909093,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
 floor.attributes.attribute_names.append("PhysicsObject")
 
-secondfloor = DefaultScene.GameObject("secondfloor", "Sprite", False)
-secondfloor.add_property("texture", "src/ground.png")
-secondfloor.transform.scale.x = 181.8181818181818
-secondfloor.transform.scale.y = 123.8095238095238
-secondfloor.transform.position.x = 518.5454545454546
-secondfloor.transform.position.y = 396.19047619047615
-DefaultScene.game_objects.append(secondfloor)
-secondfloor.attributes.attributes.append(secondfloor.attributes.PhysicsObject(secondfloor,position=(518.5454545454546,396.19047619047615),static=True,own_size=(290.90909090909093,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
-secondfloor.attributes.attribute_names.append("PhysicsObject")
+lava = DefaultScene.GameObject("lava", "Sprite", False)
+lava.add_property("texture", "src/bokeh_PNG27.png")
+lava.transform.scale.x = 1090.909090909091
+lava.transform.scale.y = 123.8095238095238
+lava.transform.position.x = -111.27272727272731
+lava.transform.position.y = 508.57142857142856
+DefaultScene.game_objects.append(lava)
+
+fllor2 = DefaultScene.GameObject("fllor2", "Sprite", False)
+fllor2.add_property("texture", "src/ground.png")
+fllor2.transform.scale.x = 181.8181818181818
+fllor2.transform.scale.y = 123.8095238095238
+fllor2.transform.position.x = 408.72727272727275
+fllor2.transform.position.y = 299.04761904761904
+DefaultScene.game_objects.append(fllor2)
+fllor2.attributes.attributes.append(fllor2.attributes.PhysicsObject(fllor2,position=(408.72727272727275,299.04761904761904),static=True,own_size=(181.8181818181818,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
+fllor2.attributes.attribute_names.append("PhysicsObject")
+
+Goal = DefaultScene.GameObject("Goal", "Sprite", False)
+Goal.add_property("texture", "src/blue.png")
+Goal.transform.scale.x = 72.72727272727273
+Goal.transform.scale.y = 95.23809523809523
+Goal.transform.position.x = 665.4545454545455
+Goal.transform.position.y = 367.6190476190476
+DefaultScene.game_objects.append(Goal)
+Goal.eventsystem.root_node.append(Goal.eventsystem.Event(Goal,DefaultScene,"colwith","Player"))
+Goal.eventsystem.root_node[0].actions.append(Goal.eventsystem.Action(Goal,DefaultScene,engine,"loadscene","Level2"))
+
+Level2 = engine.Scene("Level2", 60, engine.screen)
+engine.scenes.append(Level2)
+Player2 = Level2.GameObject("Player2", "Sprite", False)
+Player2.add_property("texture", "src/blue.png")
+Player2.transform.scale.x = 101.81818181818183
+Player2.transform.scale.y = 133.33333333333331
+Player2.transform.position.x = 109.81818181818181
+Player2.transform.position.y = 234.28571428571428
+Level2.game_objects.append(Player2)
+Player2.eventsystem.root_node.append(Player2.eventsystem.Event(Player2,Level2,"keyhold","a"))
+Player2.eventsystem.root_node[0].actions.append(Player2.eventsystem.Action(Player2,Level2,engine,"move","-5", "0"))
+Player2.eventsystem.root_node.append(Player2.eventsystem.Event(Player2,Level2,"keyhold","d"))
+Player2.eventsystem.root_node[1].actions.append(Player2.eventsystem.Action(Player2,Level2,engine,"move","5", "0"))
+Player2.eventsystem.root_node.append(Player2.eventsystem.Event(Player2,Level2,"keyhold","w"))
+Player2.eventsystem.root_node[2].actions.append(Player2.eventsystem.Action(Player2,Level2,engine,"move","0", "-5"))
+Player2.eventsystem.root_node.append(Player2.eventsystem.Event(Player2,Level2,"keyhold","s"))
+Player2.eventsystem.root_node[3].actions.append(Player2.eventsystem.Action(Player2,Level2,engine,"move","0", "5"))
 
 while True:
 	events = []
@@ -48,5 +92,7 @@ while True:
 			pygame.quit()
 			sys.exit()
 		if event.type == pygame.KEYDOWN:
+			events.append(event)
+		if event.type == pygame.KEYUP:
 			events.append(event)
 	engine.run(events)

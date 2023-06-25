@@ -1,3 +1,5 @@
 Player
 floor
-secondfloor
+lava
+fllor2
+Goal

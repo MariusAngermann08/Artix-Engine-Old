@@ -65,5 +65,4 @@ The Artix Engine project would like to acknowledge the following libraries and f
 - Pygame: [https://www.pygame.org/](https://www.pygame.org/)
 - tkinter: [https://docs.python.org/3/library/tkinter.html](https://docs.python.org/3/library/tkinter.html)
 - customtkinter: [https://customtkinter.tomschimansky.com/](https://customtkinter.tomschimansky.com/)
-- Pymunk: [https://www.pymunk.org/en/latest/index.html](https://www.pymunk.org/en/latest/index.html)
-
+-Pymunk: [https://www.pymunk.org/en/latest/index.html](https://www.pymunk.org/en/latest/index.html)

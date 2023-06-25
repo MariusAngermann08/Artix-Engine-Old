@@ -35,7 +35,7 @@ class Engine:
 			self.scenes = []
 			self.currentscene = 0
 		except:
-			print("Error Engine was not initialized")
+			print("Engine initialization failed")
 	def engine_controller(self):
 		pass
 	def engine_config(self,window_size=[600,300],window_caption="default caption",new_frame_rate=60):
@@ -58,10 +58,11 @@ class Engine:
 			self.clock = pygame.time.Clock()
 			self.space = pymunk.Space()
 			self.space.gravity = (0,500)
+			self.game_objects = []
 		def render(self,ev=None):
 			self.space.step(1/50)
 			self.screen.fill(self.bg_color)
-	
+
 			for objects in self.game_objects:
 				objects.object_process(ev)
 				if objects.object_instance != "none":
@@ -97,8 +98,10 @@ class Engine:
 						self.events = []
 						self.type = own_type
 						self.argument1 = argument1
+						self.argument2 = argument2
 						self.object = obj_link
 						self.scene = scenelink
+						self.hold = False
 					def check(self, k=None):
 						if self.type == "keypress":
 							keymap = {
@@ -132,7 +135,7 @@ class Engine:
 								"x": pygame.K_x,
 								"y": pygame.K_y,
 								"z": pygame.K_z,
-								"space": pygame.K_SPACE
+								"Space": pygame.K_SPACE
 							}
 							for i in k:
 								if i.type == pygame.KEYDOWN:
@@ -142,50 +145,202 @@ class Engine:
 											a.run()
 										for a in self.events:
 											a.check()
-						if self.type == "collision":
-							selfshape = self.object.shape
+						elif self.type == "keyhold":
+							keymap = {
+								"UP": pygame.K_UP,
+								"DOWN": pygame.K_DOWN,
+								"RIGHT": pygame.K_RIGHT,
+								"LEFT": pygame.K_LEFT,
+								"a": pygame.K_a,
+								"b": pygame.K_b,
+								"c": pygame.K_c,
+								"d": pygame.K_d,
+								"e": pygame.K_e,
+								"f": pygame.K_f,
+								"g": pygame.K_g,
+								"h": pygame.K_h,
+								"i": pygame.K_i,
+								"j": pygame.K_j,
+								"k": pygame.K_k,
+								"l": pygame.K_l,
+								"m": pygame.K_m,
+								"n": pygame.K_n,
+								"o": pygame.K_o,
+								"p": pygame.K_p,
+								"q": pygame.K_q,
+								"r": pygame.K_r,
+								"s": pygame.K_s,
+								"t": pygame.K_t,
+								"u": pygame.K_u,
+								"v": pygame.K_v,
+								"w": pygame.K_w,
+								"x": pygame.K_x,
+								"y": pygame.K_y,
+								"z": pygame.K_z,
+								"Space": pygame.K_SPACE
+							}
+
+							if self.hold == True:
+								for a in self.actions:
+									a.run()
+								for a in self.events:
+									a.check()
+								
+
+							for i in k:
+								if i.type == pygame.KEYDOWN:
+									if i.key == keymap[self.argument1]:
+										self.hold = True
+								if i.type == pygame.KEYUP:
+									if i.key == keymap[self.argument1]:
+										self.hold = False
+										
+
+							
+
+
+
+						if self.type == "colwith":
 							search = 0
-							for i in self.scene.game_objects:
-								if i.name == "argument1":
-									search = self.scene.index(i)
+							currentindex = 0
+							for objs in self.scene.game_objects:
+								if objs.name == self.argument1:
+									search = currentindex
 									break
-							objshape = self.scene.game_objects[search].shape
-							print(objshape)
-							print("")
+								currentindex += 1
 
-							collision = self.scene.space.shape_query(selfshape)
-							print(collision)
+							objectx = self.object.object_coord[0]
+							objecty = self.object.object_coord[1]
+							objectwidth = self.object.transform.scale.x
+							objectheight = self.object.transform.scale.y
 
-							for info in collision:
-								if info.shape == objshape:
+							otherx = self.scene.game_objects[search].object_coord[0]
+							othery = self.scene.game_objects[search].object_coord[1]
+							otherwidth = self.scene.game_objects[search].transform.scale.x
+							otherheight = self.scene.game_objects[search].transform.scale.y
+
+							obj1_top_left = [objectx,objecty]
+							obj1_bottom_right = [objectx + objectwidth, objecty + objectheight]
+
+							obj2_top_left = [otherx,othery]
+							obj2_bottom_right = [otherx + otherwidth, othery + otherheight]
+
+							if obj1_bottom_right[0] >= obj2_top_left[0] and obj2_bottom_right[0] >= obj1_top_left[0]:
+								if obj1_bottom_right[1] >= obj2_top_left[1] and obj2_bottom_right[1] >= obj1_top_left[1]:
 									for a in self.actions:
 										a.run()
 									for a in self.events:
 										a.check()
+
+						if self.type == "colbtw":
+
+							search1 = 0
+							currentindex = 0
+							for objs in self.scene.game_objects:
+								if objs.name == self.argument1:
+									search1 = currentindex
 									break
+								currentindex += 1
+
+							search2 = 0
+							currentindex = 0
+							for objs in self.scene.game_objects:
+								if objs.name == self.argument2:
+									search2 = currentindex
+									break
+								currentindex += 1
 
 
-							
+
+							objectx = self.scene.game_objects[search1].object_coord[0]
+							objecty = self.scene.game_objects[search1].object_coord[1]
+							objectwidth = self.scene.game_objects[search1].transform.scale.x
+							objectheight = self.scene.game_objects[search1].transform.scale.y
+
+							otherx = self.scene.game_objects[search2].object_coord[0]
+							othery = self.scene.game_objects[search2].object_coord[1]
+							otherwidth = self.scene.game_objects[search].transform.scale.x
+							otherheight = self.scene.game_objects[search].transform.scale.y
+
+							obj1_top_left = [objectx,objecty]
+							obj1_bottom_right = [objectx + objectwidth, objecty + objectheight]
+
+							obj2_top_left = [otherx,othery]
+							obj2_bottom_right = [otherx + otherwidth, othery + otherheight]
+
+							if obj1_bottom_right[0] >= obj2_top_left[0] and obj2_bottom_right[0] >= obj1_top_left[0]:
+								if obj1_bottom_right[1] >= obj2_top_left[1] and obj2_bottom_right[1] >= obj1_top_left[1]:
+									for a in self.actions:
+										a.run()
+									for a in self.events:
+										a.check()
+
+
 
 				class Action:
-					def __init__(self,rootlink=None, owntype="", argument1="", argument2=""):
+					def __init__(self,rootlink=None,scenelink=None,enginelink=None, owntype="", argument1="", argument2="", argument3=""):
 						self.type = owntype
 						self.argument1 = argument1
 						self.argument2 = argument2
+						self.argument3 = argument3
 						self.root = rootlink
+						self.scene = scenelink
+						self.engine = enginelink
 					def run(self):
 						if self.type == "print":
 							print(self.argument1)
-						elif self.type == "apply_force":
+						elif self.type == "applyforce":
 							self.root.apply_force((int(self.argument1),int(self.argument2)))
-						elif self.type == "set_position":
+						elif self.type == "setpos":
 							if "PhysicsObject" in self.root.attributes.attribute_names:
 								self.root.body.position = (int(self.argument1),int(self.argument2))
 							else:
-								self.root.transform.position.x = int(self.argument1)
-								self.root.transform.position.y = int(self.argument2)
+								self.root.object_coord[0] = int(self.argument1)
+								self.root.object_coord[1] = int(self.argument2)
+						elif self.type == "move":
+							if "PhysicsObject" in self.root.attributes.attribute_names:
+								self.root.body.position = (self.root.body.position[0]+int(self.argument1),self.root.body.position[1]+int(self.argument2))
+							else:
+								self.root.transform.position.x = self.root.transform.position.x+int(self.argument1)
+								self.root.transform.position.y = self.root.transform.position.y+int(self.argument2)
+						elif self.type == "setobjpos":
+							currentindex = 0
+							search = 0
+							for objs in self.scene.game_objects:
+								if objs.name == self.argument1:
+									search = currentindex
+									break
+								currentindex += 1
 
+							if "PhysicsObject" in self.scene.game_objects[search].attributes.attribute_names:
+								self.scene.game_objects[search].body.position = (int(self.argument2),int(self.argument3))
+							else:
+								self.scene.game_objects[search].object_coord[0] = int(self.argument2)
+								self.scene.game_objects[search].object_coord[1] = int(self.argument3)
+						elif self.type == "moveobj":
+							currentindex = 0
+							search = 0
+							for objs in self.scene.game_objects:
+								if objs.name == self.argument1:
+									search = currentindex
+									break
+								currentindex += 1
 
+							if "PhysicsObject" in self.scene.game_objects[search].attributes.attribute_names:
+								self.scene.game_objects[search].body.position = (self.scene.game_objects[search].body.position[0]+int(self.argument2),self.scenes.game_objects[search].body.position[1]+int(self.argument3))
+							else:
+								self.scene.game_objects[search].object_coord[0] = self.scene.game_objects[search].object_coord[0]+int(self.argument2)
+								self.scene.game_objects[search].object_coord[1] = self.scene.game_objects[search].object_coord[1]+int(self.argument3)
+
+						elif self.type == "loadscene":
+							search = 0
+							currentindex = 0
+							for scene in self.engine.scenes:
+								if scene.name == self.argument1:
+									search = currentindex
+									break
+								currentindex += 1
+							self.engine.currentscene = search
 
 
 			def object_process(self, event1=None):
@@ -252,35 +407,38 @@ class Engine:
 						self.static = static
 						self.mass = mass
 				class PhysicsObject:
-					def __init__(self,rootnode=None,position=(0, 0), static=False, mass=1, inertia=100, own_size=(100, 100), space_path=0):
+					def __init__(self, rootnode=None, position=(0, 0), static=False, mass=1, inertia=100, own_size=(100, 100), space_path=0):
 						self.root = rootnode
 
-						# Calculate half the size for convenience
-						half_width = float(own_size[0] / 2)
-						half_height = float(own_size[1] / 2)
+						
 
-						# Define the vertices of the square
-						vertices = [(-half_width, -half_height),
-						(-half_width, half_height),
-						(half_width, half_height),
-						(half_width, -half_height)]
-
-						if static == False:
+						if not static:
 							self.body = pymunk.Body(mass, inertia, body_type=pymunk.Body.DYNAMIC)
 						else:
 							self.body = pymunk.Body(mass, inertia, body_type=pymunk.Body.STATIC)
+
+						# Set the position of the body directly
 						self.body.position = position
-						self.shape = pymunk.Poly(self.body, vertices)
+
+						self.shape = pymunk.Poly.create_box(self.body, size=(own_size[0], own_size[1]))
+
+						vertices = self.shape.get_vertices()
+						vertices[0] -= (own_size[0] / 2,0)
+						vertices[1] -= (1,own_size[1] / 2)
+						vertices[2] -= (own_size[0] / 2,0)
+						vertices[3] -= (0,own_size[1] / 2)
+						self.shape.vertices = vertices
 
 
-						self.shape.friction = 0.5  
+						self.shape.friction = 0.5
 
 						# Add damping to the body
-						self.body.angular_damping = 0.1  
+						self.body.angular_damping = 0.1
 						self.body.linear_damping = 0.2
 
 						self.root.body = self.body
 						self.root.shape = self.shape
 
 						space_path.add(self.body, self.shape)
+
 

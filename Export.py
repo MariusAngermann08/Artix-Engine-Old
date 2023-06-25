@@ -13,15 +13,18 @@ class Export:
 			if lines.rstrip("\n") != "":
 				self.scenes.append(lines.rstrip("\n"))
 
-		#open the objects file of scene
-		openfile = open("projects/"+self.project_name+"/Scenes/"+self.scenes[0]+".txt", "r")
-		readfile = openfile.readlines()
-		openfile.close()
-		temp = []
-		for lines in readfile:
-			if lines.rstrip("\n") != "":
-				temp.append(lines.rstrip("\n"))
-		self.objects.append(temp)
+		currentindex = 0
+		for scenes in self.scenes:
+			#open the objects file of scene
+			openfile = open("projects/"+self.project_name+"/Scenes/"+self.scenes[currentindex]+".txt", "r")
+			readfile = openfile.readlines()
+			openfile.close()
+			temp = []
+			for lines in readfile:
+				if lines.rstrip("\n") != "":
+					temp.append(lines.rstrip("\n"))
+			self.objects.append(temp)
+			currentindex += 1
 	
 
 
@@ -104,13 +107,45 @@ class Export:
 						static = "False"
 					mass = single[1]
 					inertia = single[2]
-					value = objs+".attributes.attributes.append("+objs+".attributes.PhysicsObject("+objs+",position=("+str(fposx)+","+str(fposy)+"),static="+static+",own_size=("+str(fscalex* 1.6)+","+str(fscaley)+"), space_path="+self.scenes[currentindex]+".space, mass="+mass+",inertia="+inertia+"))\n"
+					value = objs+".attributes.attributes.append("+objs+".attributes.PhysicsObject("+objs+",position=("+str(fposx)+","+str(fposy)+"),static="+static+",own_size=("+str(fscalex)+","+str(fscaley)+"), space_path="+self.scenes[currentindex]+".space, mass="+mass+",inertia="+inertia+"))\n"
 					self.exportfile.append(value)
 					value = objs+".attributes.attribute_names.append(\"PhysicsObject\")\n"
 					self.exportfile.append(value)
 
-
-
+				openfile = open("projects/"+self.project_name+"/Scenes/"+self.scenes[currentindex]+"/"+objs+".es", "r")
+				readfile = openfile.readlines()
+				openfile.close()
+				currenttemp = []
+				for i in readfile:
+					value = i.rstrip("\n")
+					if value != "":
+						currenttemp.append(value)
+				currentevent = -1
+				for lines in currenttemp:
+					value = lines.split("+")
+					if value[0] == "event":
+						currentevent += 1
+						type1 = value[1]
+						arguments = ""
+						if len(value) == 3:
+							arguments = "\""+value[2]+"\""
+						elif len(value) == 4:
+							arguments = "\""+value[2]+"\","+" \""+value[3]+"\""
+						elif len(value) == 5:
+							arguments = "\""+value[2]+"\","+" \""+value[3]+"\", "+"\""+value[4]+"\""
+						inner = objs+","+self.scenes[currentindex]+",\""+value[1]+"\","+arguments
+						self.exportfile.append(objs+".eventsystem.root_node.append("+objs+".eventsystem.Event("+inner+"))\n")
+					elif value[0] == "action":
+						type1 = value[1]
+						arguments = ""
+						if len(value) == 3:
+							arguments = "\""+value[2]+"\""
+						elif len(value) == 4:
+							arguments = "\""+value[2]+"\","+" \""+value[3]+"\""
+						elif len(value) == 5:
+							arguments = "\""+value[2]+"\","+" \""+value[3]+"\", "+"\""+value[4]+"\""
+						inner = objs+","+self.scenes[currentindex]+",engine,\""+value[1]+"\","+arguments
+						self.exportfile.append(objs+".eventsystem.root_node["+str(currentevent)+"].actions.append("+objs+".eventsystem.Action("+inner+"))\n")
 
 				self.exportfile.append("\n")
 			currentindex += 1
@@ -124,6 +159,8 @@ class Export:
 		self.exportfile.append("			pygame.quit()\n")
 		self.exportfile.append("			sys.exit()\n")
 		self.exportfile.append("		if event.type == pygame.KEYDOWN:\n")
+		self.exportfile.append("			events.append(event)\n")
+		self.exportfile.append("		if event.type == pygame.KEYUP:\n")
 		self.exportfile.append("			events.append(event)\n")
 		self.exportfile.append("	engine.run(events)\n")
 		#self.exportfile.append("\n")
