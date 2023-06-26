@@ -1,5 +1,5 @@
 event+keypress+Space
-action+applyforce+0+-20
+action+applyforce+0+-15
 event+keyhold+a
 action+applyforce+-1+0
 event+keyhold+d

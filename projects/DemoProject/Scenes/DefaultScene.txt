@@ -1,5 +1,4 @@
 Player
 floor
-lava
 fllor2
 Goal

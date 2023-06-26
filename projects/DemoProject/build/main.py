@@ -15,10 +15,10 @@ Player = DefaultScene.GameObject("Player", "Sprite", False)
 Player.add_property("texture", "src/blue.png")
 Player.transform.scale.x = 109.0909090909091
 Player.transform.scale.y = 123.8095238095238
-Player.transform.position.x = 37.81818181818181
-Player.transform.position.y = 180.95238095238093
+Player.transform.position.x = 395.6363636363636
+Player.transform.position.y = 68.57142857142857
 DefaultScene.game_objects.append(Player)
-Player.attributes.attributes.append(Player.attributes.PhysicsObject(Player,position=(37.81818181818181,180.95238095238093),static=False,own_size=(109.0909090909091,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
+Player.attributes.attributes.append(Player.attributes.PhysicsObject(Player,position=(395.6363636363636,68.57142857142857),static=False,own_size=(109.0909090909091,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
 Player.attributes.attribute_names.append("PhysicsObject")
 Player.eventsystem.root_node.append(Player.eventsystem.Event(Player,DefaultScene,"keypress","Space"))
 Player.eventsystem.root_node[0].actions.append(Player.eventsystem.Action(Player,DefaultScene,engine,"applyforce","0", "-20"))
@@ -26,43 +26,33 @@ Player.eventsystem.root_node.append(Player.eventsystem.Event(Player,DefaultScene
 Player.eventsystem.root_node[1].actions.append(Player.eventsystem.Action(Player,DefaultScene,engine,"applyforce","-1", "0"))
 Player.eventsystem.root_node.append(Player.eventsystem.Event(Player,DefaultScene,"keyhold","d"))
 Player.eventsystem.root_node[2].actions.append(Player.eventsystem.Action(Player,DefaultScene,engine,"applyforce","1", "0"))
-Player.eventsystem.root_node.append(Player.eventsystem.Event(Player,DefaultScene,"colwith","lava"))
-Player.eventsystem.root_node[3].actions.append(Player.eventsystem.Action(Player,DefaultScene,engine,"setpos","127", "140"))
 
 floor = DefaultScene.GameObject("floor", "Sprite", False)
 floor.add_property("texture", "src/ground.png")
 floor.transform.scale.x = 290.90909090909093
 floor.transform.scale.y = 123.8095238095238
 floor.transform.position.x = 16.72727272727272
-floor.transform.position.y = 339.04761904761904
+floor.transform.position.y = 454.2857142857143
 DefaultScene.game_objects.append(floor)
-floor.attributes.attributes.append(floor.attributes.PhysicsObject(floor,position=(16.72727272727272,339.04761904761904),static=True,own_size=(290.90909090909093,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
+floor.attributes.attributes.append(floor.attributes.PhysicsObject(floor,position=(16.72727272727272,454.2857142857143),static=True,own_size=(290.90909090909093,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
 floor.attributes.attribute_names.append("PhysicsObject")
-
-lava = DefaultScene.GameObject("lava", "Sprite", False)
-lava.add_property("texture", "src/bokeh_PNG27.png")
-lava.transform.scale.x = 1090.909090909091
-lava.transform.scale.y = 123.8095238095238
-lava.transform.position.x = -111.27272727272731
-lava.transform.position.y = 508.57142857142856
-DefaultScene.game_objects.append(lava)
 
 fllor2 = DefaultScene.GameObject("fllor2", "Sprite", False)
 fllor2.add_property("texture", "src/ground.png")
 fllor2.transform.scale.x = 181.8181818181818
 fllor2.transform.scale.y = 123.8095238095238
-fllor2.transform.position.x = 408.72727272727275
-fllor2.transform.position.y = 299.04761904761904
+fllor2.transform.position.x = 390.5454545454546
+fllor2.transform.position.y = 286.66666666666663
 DefaultScene.game_objects.append(fllor2)
-fllor2.attributes.attributes.append(fllor2.attributes.PhysicsObject(fllor2,position=(408.72727272727275,299.04761904761904),static=True,own_size=(181.8181818181818,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
+fllor2.attributes.attributes.append(fllor2.attributes.PhysicsObject(fllor2,position=(390.5454545454546,286.66666666666663),static=True,own_size=(181.8181818181818,123.8095238095238), space_path=DefaultScene.space, mass=1,inertia=100))
 fllor2.attributes.attribute_names.append("PhysicsObject")
 
 Goal = DefaultScene.GameObject("Goal", "Sprite", False)
 Goal.add_property("texture", "src/blue.png")
 Goal.transform.scale.x = 72.72727272727273
 Goal.transform.scale.y = 95.23809523809523
-Goal.transform.position.x = 665.4545454545455
-Goal.transform.position.y = 367.6190476190476
+Goal.transform.position.x = 734.5454545454545
+Goal.transform.position.y = 153.33333333333331
 DefaultScene.game_objects.append(Goal)
 Goal.eventsystem.root_node.append(Goal.eventsystem.Event(Goal,DefaultScene,"colwith","Player"))
 Goal.eventsystem.root_node[0].actions.append(Goal.eventsystem.Action(Goal,DefaultScene,engine,"loadscene","Level2"))
