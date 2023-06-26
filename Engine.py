@@ -67,7 +67,7 @@ class Engine:
 				objects.object_process(ev)
 				if objects.object_instance != "none":
 					rotated_obj = pygame.transform.rotate(objects.object_instance, objects.transform.rotation)
-					self.screen.blit(pygame.transform.scale(rotated_obj, (objects.transform.scale.x,objects.transform.scale.y)), objects.object_coord)
+					self.screen.blit(pygame.transform.scale(rotated_obj, (objects.transform.scale.x,objects.transform.scale.y)), [objects.object_coord[0]-(objects.transform.scale.x/2.083),objects.object_coord[1]])
 
 			
 			pygame.display.update()
@@ -420,7 +420,7 @@ class Engine:
 						# Set the position of the body directly
 						self.body.position = (position[0]+(own_size[0]/2),position[1]+(own_size[1]/2))
 
-						self.shape = pymunk.Poly.create_box(self.body, size=(own_size[0], own_size[1]))
+						self.shape = pymunk.Poly.create_box(self.body, size=(own_size[0]+(own_size[0]/6), own_size[1]))
 
 
 

@@ -937,11 +937,6 @@ class Viewport:
 				index = self.scenetreelink.select(self.scenetreelink.displayed_objects[self.scenetreelink.displayed_objects.index(objects)], "nk")
 				break
 
-
-
-
-
-
 	def secondinit(self, propertieslink=None):
 		self.properties = propertieslink
 
@@ -1880,14 +1875,17 @@ file_menu.add_separator()
 file_menu.add_command(label="Project Manager", command=openprcmanager)
 file_menu.add_command(label="Quit", command=app.quit)
 
+def opendocs():
+	script_dir = os.path.dirname(os.path.realpath(__file__))
+	subprocess.Popen('cmd /c cd /d "{}" &'.format(script_dir), shell=True)
+	subprocess.Popen('python opendocs.py', shell=True)
+
 #adding a edit menu into menubar
 edit_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)
 menu_bar.add_cascade(label="Edit", menu=edit_menu)
-edit_menu.add_command(label="Copy")
-edit_menu.add_command(label="Paste")
-edit_menu.add_command(label="Undo")
-edit_menu.add_command(label="Redo")
-edit_menu.add_command(label="Editor Settings")
+edit_menu.add_command(label="Open Documentation", command=opendocs)
+edit_menu.add_separator()
+edit_menu.add_command(label="Project Settings")
 
 #adding a selection menu into menubar
 selection_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)
