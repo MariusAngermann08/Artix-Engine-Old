@@ -827,6 +827,10 @@ def build_game():
 
 viewport_canvas = ctk.CTkCanvas(app,width=1100,height=630)
 viewport_canvas.place(x=415,y=5)
+#viewport_canvas.configure(scrollregion=(-1000, -1000, 1000, 1000))
+#viewport_canvas.configure(xscrollincrement='1', yscrollincrement='1')
+
+
 
 play_button = ctk.CTkButton(viewport_canvas,text="Play",command=build_game,corner_radius=0, fg_color="#49bf51", font=("",20))
 play_button.place(x=625,y=0,relwidth=0.15,relheight=0.1)
@@ -847,6 +851,7 @@ class Viewport:
 		self.selected_item_id = None
 		self.outline_color = 'blue'
 		self.outline_width = 2
+
 
 	def start_drag(self, event):
 		item_id = event.widget.find_closest(event.x, event.y)
@@ -1013,7 +1018,7 @@ class Viewport:
 				image_tk = ImageTk.PhotoImage(image1)
 				self.imagetks.append(image_tk)
 
-				item_id = viewport_canvas.create_image(editor_x, editor_y, image=image_tk)
+				item_id = viewport_canvas.create_image(editor_x, editor_y, image=image_tk,tags="image")
 				self.itemtable[item_id] = objs.name
 				viewport_canvas.tag_bind(item_id, '<ButtonPress-1>', self.start_drag)
 				viewport_canvas.tag_bind(item_id, '<B1-Motion>', self.drag)
@@ -1034,6 +1039,8 @@ properties_panel.assign(viewport)
 viewport.secondinit(properties_panel)
 
 fm.secondinit(scenetree, viewport)
+
+
 
 def EventSystemWindow():
 	if scenetree.selected_name == "Camera2D":
@@ -1868,9 +1875,6 @@ def new_scene():
 file_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)
 file_menu.add_command(label="New Scene", command=new_scene)
 menu_bar.add_cascade(label="File", menu=file_menu)
-file_menu.add_command(label="Save")
-file_menu.add_command(label="Save as")
-file_menu.add_command(label="Project Settings")
 file_menu.add_separator()
 file_menu.add_command(label="Project Manager", command=openprcmanager)
 file_menu.add_command(label="Quit", command=app.quit)
@@ -1884,14 +1888,48 @@ def opendocs():
 edit_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)
 menu_bar.add_cascade(label="Edit", menu=edit_menu)
 edit_menu.add_command(label="Open Documentation", command=opendocs)
-edit_menu.add_separator()
-edit_menu.add_command(label="Project Settings")
+
+
+def export():
+	def copy_files(source_dir, destination_dir):
+		file_list = os.listdir(source_dir)
+		for file_name in file_list:
+			source_path = os.path.join(source_dir, file_name)
+			destination_path = os.path.join(destination_dir, file_name)
+			shutil.copy2(source_path, destination_path)
+
+	try:
+		os.remove("projects/"+project_name+"/build")
+	except:
+		pass
+	directory_path = "projects/"+project_name+"/build"
+	os.makedirs(directory_path, exist_ok=True)
+
+	directory_path = "projects/"+project_name+"/build/src"
+	os.makedirs(directory_path, exist_ok=True)
+
+	copy_files("projects/"+project_name+"/Files", "projects/"+project_name+"/build/src")
+	shutil.copy2("Engine.py", "projects/"+project_name+"/build")
+
+	exporter = Export(project_name)
+	exporter.build()
+
+	relative_path = "projects/"+project_name+"/build/main.py"
+	absolute_path = os.path.abspath(relative_path)
+	file_dir = os.path.dirname(absolute_path)
+
+	try:
+		directory_path = filedialog.askdirectory(mustexist=True)
+		shutil.rmtree(directory_path)
+		shutil.copytree("projects/"+project_name+"/build", export_directory)
+	except:
+		pass
 
 #adding a selection menu into menubar
-selection_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)
-menu_bar.add_cascade(label="Selection", menu=selection_menu)
-selection_menu.add_command(label="Select all")
-selection_menu.add_command(label="Clear Selection")
+export_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)
+menu_bar.add_cascade(label="Export", menu=export_menu)
+export_menu.add_command(label="To File", command=export)
+
 
 
 properties_apply_button = ctk.CTkButton(properties_panel_heading, text="Apply", fg_color="#5f9467", font=("",20), command=properties_panel.apply)

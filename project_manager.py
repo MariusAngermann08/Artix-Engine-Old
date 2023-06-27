@@ -251,8 +251,7 @@ while True:
 			elif event.button == 5: # Scroll down
 				if rendered_projects[len(rendered_projects)-1].position[1] >= 500:
 					scroll_projects("down")
-			
-					
+
 	#logic
 	if new_project_button.check_click() == True:
 		renderit = False
