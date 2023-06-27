@@ -1,4 +1,0 @@
-Player
-floor
-fllor2
-Goal
