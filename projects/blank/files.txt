@@ -1,2 +1,0 @@
-blue.png
-ground.png
