@@ -176,7 +176,7 @@ class FileManager:
 			name_label = ctk.CTkLabel(file_manager_frame, text=lines, fg_color="transparent")
 			self.displayed_scenes.append(button)
 			self.displayed_scenes.append(name_label)
-			print(self.scenes_list)
+			
 
 		for objects in self.displayed_files:
 			if currentindex == 3:
@@ -277,7 +277,6 @@ class FileManager:
 				continue
 			currentindex += 1
 	def delete_file(self, file_name):
-		print("deleted file "+file_name)
 		openfile = open("projects/"+project_name+"/files.txt", "r")
 		readfile = openfile.readlines()
 		openfile.close()
@@ -302,7 +301,6 @@ class FileManager:
 		self.menu.post(event.x_root, event.y_root)
 
 	def on_button_press(self, event, button):
-		print("press")
 		app.config(cursor="icon")
 		self.dragged = True
 		self.dragged_button = button
@@ -376,9 +374,7 @@ def general_update(preset="startup",name1=""):
 		scenetemp = Scene(i,link=scenes)
 		scenes.append(scenetemp)
 		openfile = open("projects/"+project_name+"/Scenes/"+i+".txt", "r")
-		print("opened " + "projects/"+project_name+"/Scenes/"+i+".txt")
 		readfile = openfile.readlines()
-		print(readfile)
 		openfile.close()
 		for objs in readfile:
 			scenes[currentindex].objects.append(scenetemp.Sprite2D(objs))
@@ -413,7 +409,6 @@ class SceneTree:
 	def load_scene(self, name=""):
 		for objects in self.displayed_objects:
 			objects.destroy()
-			print("destroyed")
 		self.displayed_objects.clear()
 
 
@@ -489,10 +484,8 @@ class SceneTree:
 
 
 	def update(self):
-		print("updated")
 		for objects in self.displayed_objects:
 			objects.destroy()
-			print("destroyed")
 		self.displayed_objects.clear()
 		self.load_scene(self.currentscene)
 		self.select(self.displayed_objects[len(self.displayed_objects)-1])
@@ -501,13 +494,10 @@ class SceneTree:
 
 	def delete_object(self, objectname=""): #objectname is for example player\n
 		for scenes in self.sceneslink:
-			print("another")
 			if scenes.name == self.currentscene:
 				for objs in scenes.objects:
 					if objs.type != "Camera2D":
 						if objs.name == objectname or objs.name == objectname+"\n":
-							print(objs.name)
-							print("removed")
 							scenes.objects.remove(objs)
 							break
 
@@ -904,7 +894,6 @@ class Viewport:
 		)
 
 		viewport_canvas.tag_raise(outline_id)
-		print("Coordinates:", x, y)
 		self.drag_data = {'x': 0, 'y': 0, 'item_id': None}
 
 		old_width = 1100
@@ -935,9 +924,7 @@ class Viewport:
 		self.properties.update()
 
 		for objects in self.scenetreelink.displayed_objects:
-			print("loop")
 			text = objects.cget("text")
-			print(text,name)
 			if text == name:
 				index = self.scenetreelink.select(self.scenetreelink.displayed_objects[self.scenetreelink.displayed_objects.index(objects)], "nk")
 				break
@@ -967,7 +954,6 @@ class Viewport:
 					searched = scenes.index(differentscenes)
 					break
 			else:
-				print(name1)
 				if differentscenes.name == name1:
 					searched = scenes.index(differentscenes)
 					break
@@ -978,8 +964,7 @@ class Viewport:
 				currentindex += 1
 				continue
 
-			print(scenes)
-			print("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+objs.name+".config")
+			
 			if objs.name != "":
 				openfile = open("projects/"+project_name+"/Scenes/"+self.scenetreelink.currentscene+"/"+objs.name.rstrip("\n")+".config", "r")
 			else:
@@ -1009,7 +994,6 @@ class Viewport:
 			editor_x = game_x
 			editor_y = game_y
 
-			print("there")
 			if objecttemp[6] == "none": 
 				pass
 			else:
@@ -1267,7 +1251,6 @@ def EventSystemWindow():
 				if self.param == "keypress" or self.param == "keyhold":
 					self.optionmenu1 = ctk.CTkOptionMenu(self.frame,fg_color="#878787",button_color="#333333", values=['Space', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'])
 					self.optionmenu1.place(x=190,y=2.5,relwidth=0.2,relheight=0.8)
-					print(self.args)
 					self.optionmenu1.set(self.args[0])
 					self.displayed_objects.append(self.optionmenu1)
 				elif self.param == "colwith":
