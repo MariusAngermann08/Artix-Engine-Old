@@ -21,8 +21,6 @@ also open [documentation.pdf](documentation.pdf)
 
 - **Game Export:** You can export your games as Python files, which can be executed using Pygame. This feature allows you to share your games with others and run them on various platforms.
 
-- **High Frame Rates:** Exported games from Artix Engine can achieve frame rates of up to 200 FPS, ensuring smooth and responsive gameplay experiences.
-
 ## Requirements
 
 - **Python:** Artix Engine requires Python 3.9 or later to run.
