@@ -1920,10 +1920,15 @@ def export():
 
 	try:
 		directory_path = filedialog.askdirectory(mustexist=True)
-		shutil.rmtree(directory_path)
-		shutil.copytree("projects/"+project_name+"/build", export_directory)
-	except:
-		pass
+		if directory_path:
+			destination_path = os.path.join(directory_path, "build")
+			shutil.rmtree(destination_path, ignore_errors=True)  # Remove the existing "build" directory if it exists
+			shutil.copytree("projects/" + project_name + "/build", destination_path)
+	except Exception as e:
+		print("An error occurred:", str(e))
+
+
+
 
 #adding a selection menu into menubar
 export_menu = tk.Menu(menu_bar, tearoff=False, font=menu_font)

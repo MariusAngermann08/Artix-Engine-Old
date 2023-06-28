@@ -50,10 +50,10 @@ class Engine:
 	class Scene:
 		game_objects = []
 		rigid_bodies = []
-		def __init__(self, scene_name="default scene", engine_frame_rate=60, display_surface=0, global_gravity=(0,500)):
+		def __init__(self, scene_name="default scene", engine_frame_rate=60, display_surface=0, global_gravity=(0,500), bgcolor=(255,255,255)):
 			self.name = scene_name
 			self.frame_rate = engine_frame_rate
-			self.bg_color = (255,255,255)
+			self.bg_color = bgcolor
 			self.screen = display_surface
 			self.clock = pygame.time.Clock()
 			self.space = pymunk.Space()

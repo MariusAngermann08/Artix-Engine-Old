@@ -1,6 +1,13 @@
 # Artix Engine - 2D Python Game Engine
 
-Artix Engine is a 2D game engine written in Python that offers visual programming through an event system and provides object behaviors called attributes. It includes a file manager for importing textures, a built-in physics engine, and a project manager to efficiently organize your game projects. With Artix Engine, you can export your games to a Python file, which uses the Pygame library to run and supports high frame rates of up to 200 FPS.
+Artix Engine is a simple 2D game engine written in Python that offers visual programming through an event system and provides object behaviors called attributes. It includes a file manager for importing textures, a built-in physics engine, and a project manager to efficiently organize your game projects. With Artix Engine, you can export your games to a Python file, which uses the Pygame library to run.
+
+## Documentation
+
+-You can open the Documentation in the Editor by clicking Edit->Open Documentation or you could
+also open [documentation.pdf](documentation.pdf)
+
+*Note that githubs PDF preview doesnt support hyperlinks so you cant access the pages trough the table of contents*
 
 ## Features
 

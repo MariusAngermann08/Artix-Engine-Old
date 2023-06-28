@@ -280,61 +280,62 @@ while True:
 			fileopen = open('registered_projects.info','r')
 			fileread = fileopen.readlines()
 			for lines in fileread:
-				registered_projects_temp.append(lines)
+				registered_projects_temp.append(lines.rstrip("\n"))
 			fileopen.close()
 			final = new_project_box.get_value()
-			renderit = True
-			fileopen_privat = open('registered_projects.info','w')
-			fileopen_privat.writelines(final+'\n')
+			if final != "" and final not in registered_projects_temp:
+				renderit = True
+				fileopen_privat = open('registered_projects.info','w')
+				fileopen_privat.writelines(final+'\n')
 
-			current_dir = os.getcwd()
-			projects_path = os.path.join(current_dir, "projects")
-			new_folder_path = os.path.join(projects_path, final)
-			os.mkdir(new_folder_path)
-			file_path = os.path.join(new_folder_path, "project.artix")
-			with open(file_path, 'w') as f:
-				f.write('never')
+				current_dir = os.getcwd()
+				projects_path = os.path.join(current_dir, "projects")
+				new_folder_path = os.path.join(projects_path, final)
+				os.mkdir(new_folder_path)
+				file_path = os.path.join(new_folder_path, "project.artix")
+				with open(file_path, 'w') as f:
+					f.write('never')
 
-			file_path = os.path.join(new_folder_path, "files.txt")
-			with open(file_path, 'w') as f:
-				f.write('')
+				file_path = os.path.join(new_folder_path, "files.txt")
+				with open(file_path, 'w') as f:
+					f.write('')
 
-			file_path = os.path.join(new_folder_path, "scenes.txt")
-			with open(file_path, 'w') as f:
-				f.write('DefaultScene')
+				file_path = os.path.join(new_folder_path, "scenes.txt")
+				with open(file_path, 'w') as f:
+					f.write('DefaultScene')
 
-			file_path = os.path.join(new_folder_path, "Files")
-			os.mkdir(file_path)
+				file_path = os.path.join(new_folder_path, "Files")
+				os.mkdir(file_path)
 
-			file_path = os.path.join(new_folder_path, "Scenes")
-			os.mkdir(file_path)
-			actualfile = os.path.join(file_path, "DefaultScene.txt")
-			with open(actualfile, 'w') as f:
-				f.write('')
+				file_path = os.path.join(new_folder_path, "Scenes")
+				os.mkdir(file_path)
+				actualfile = os.path.join(file_path, "DefaultScene.txt")
+				with open(actualfile, 'w') as f:
+					f.write('')
 
-			folder = os.path.join(file_path, "DefaultScene")
-			os.mkdir(folder)
-			actualfile = os.path.join(folder, "Camera2D.config")
-			cameraconfig = ["#TRANSFORM","0","0","#BGCOLOR","#ffffff"]
-			with open(actualfile, 'w') as f:
-				for strings in cameraconfig:
-					f.write(strings+"\n")
+				folder = os.path.join(file_path, "DefaultScene")
+				os.mkdir(folder)
+				actualfile = os.path.join(folder, "Camera2D.config")
+				cameraconfig = ["#TRANSFORM","0","0","#BGCOLOR","#ffffff"]
+				with open(actualfile, 'w') as f:
+					for strings in cameraconfig:
+						f.write(strings+"\n")
 
-			loe = len(registered_projects_temp)
-			currentindex = 0
-			for elements in registered_projects_temp:
-				if currentindex == (loe-1):
-					fileopen_privat.writelines(elements+'\n')
-				else:
-					fileopen_privat.writelines(elements)
-				currentindex += 1
-			fileopen_privat.close()
-			final = ""
-			rendered_projects = []
-			projects_initialized = []
-			initialize_projects()
-			print(projects_initialized)
-			add_prc_to_render(last_pos)
+				loe = len(registered_projects_temp)
+				currentindex = 0
+				for elements in registered_projects_temp:
+					if currentindex == (loe-1):
+						fileopen_privat.writelines(elements+'\n')
+					else:
+						fileopen_privat.writelines(elements)
+					currentindex += 1
+				fileopen_privat.close()
+				final = ""
+				rendered_projects = []
+				projects_initialized = []
+				initialize_projects()
+				print(projects_initialized)
+				add_prc_to_render(last_pos)
 	
 
 	pygame.display.update()

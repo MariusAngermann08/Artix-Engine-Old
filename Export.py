@@ -45,7 +45,20 @@ class Export:
 
 		currentindex = 0
 		for scenes in self.objects:
-			self.exportfile.append(self.scenes[currentindex]+" = engine.Scene(\""+self.scenes[currentindex]+"\", 60, engine.screen)\n")
+			openfile = open("projects/"+self.project_name+"/Scenes/"+self.scenes[currentindex]+"/Camera2D.config", "r")
+			readfile = openfile.readlines()
+			openfile.close()
+			fasttemp = []
+			for lines in readfile:
+				value = lines.rstrip("\n")
+				if  value != "":
+					fasttemp.append(value)
+			def hex_to_rgb(value):
+				value = value.lstrip('#')
+				lv = len(value)
+				return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+			rgb = hex_to_rgb(fasttemp[4])
+			self.exportfile.append(self.scenes[currentindex]+" = engine.Scene(\""+self.scenes[currentindex]+"\", 60, engine.screen, bgcolor=("+str(rgb[0])+","+str(rgb[1])+","+str(rgb[2])+"))\n")
 			self.exportfile.append("engine.scenes.append("+self.scenes[currentindex]+")\n")
 
 			for objs in self.objects[currentindex]:
