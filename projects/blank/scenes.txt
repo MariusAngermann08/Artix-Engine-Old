@@ -1,2 +1,0 @@
-DefaultScene
-Level2
