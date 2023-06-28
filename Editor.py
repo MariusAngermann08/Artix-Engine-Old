@@ -1797,9 +1797,9 @@ def AttributesWindow():
 	addattributebutton.bind("<Button-1>", add_menu)
 
 	addattributemenu = tk.Menu(root, tearoff=0)
-	addattributemenu.add_command(label="Gravity",font=("",15),command=lambda: add_attribute("Gravity"))
+	#addattributemenu.add_command(label="Gravity",font=("",15),command=lambda: add_attribute("Gravity"))
 	addattributemenu.add_command(label="Physics Object",font=("",15),command=lambda: add_attribute("PhysicsObject"))
-	addattributemenu.add_command(label="Camera Follow",font=("",15),command=lambda: add_attribute("camerafollow"))
+	#addattributemenu.add_command(label="Camera Follow",font=("",15),command=lambda: add_attribute("camerafollow"))
 
 
 
