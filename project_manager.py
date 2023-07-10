@@ -199,8 +199,9 @@ recent_projects_label = font_1.render("Recent Projects:",True,(255,255,255))
 new_project_button = Button("Create Project",pygame.font.SysFont(None,30),200,40,(30,70),(92, 91, 91),(56, 56, 56),(143, 141, 141),12)
 
 
-renderit = True
+renderit = False
 final = ""
+create = False
 new_project_box = AskBox("Enter Project Name","New Project",(1000,700))
 
 fade_rect = pygame.Rect(0,0,1000,200)
@@ -254,7 +255,7 @@ while True:
 
 	#logic
 	if new_project_button.check_click() == True:
-		renderit = False
+		renderit = True
 
 
 	#rendering
@@ -271,73 +272,81 @@ while True:
 	new_project_button.draw(screen)
 	
 
-	if renderit != True:
-		renderit = new_project_box.get_active()
-		if renderit != True:
-			new_project_box.render(screen,(1000,700))
+	if renderit == True:
+		value = new_project_box.get_active()
+		if value == True:
+			renderit = False
+			create = True
 		else:
-			registered_projects_temp = []
-			fileopen = open('registered_projects.info','r')
-			fileread = fileopen.readlines()
-			for lines in fileread:
-				registered_projects_temp.append(lines.rstrip("\n"))
-			fileopen.close()
-			final = new_project_box.get_value()
-			if final != "" and final not in registered_projects_temp:
-				renderit = True
-				fileopen_privat = open('registered_projects.info','w')
-				fileopen_privat.writelines(final+'\n')
-
-				current_dir = os.getcwd()
-				projects_path = os.path.join(current_dir, "projects")
-				new_folder_path = os.path.join(projects_path, final)
-				os.mkdir(new_folder_path)
-				file_path = os.path.join(new_folder_path, "project.artix")
-				with open(file_path, 'w') as f:
-					f.write('never')
-
-				file_path = os.path.join(new_folder_path, "files.txt")
-				with open(file_path, 'w') as f:
-					f.write('')
-
-				file_path = os.path.join(new_folder_path, "scenes.txt")
-				with open(file_path, 'w') as f:
-					f.write('DefaultScene')
-
-				file_path = os.path.join(new_folder_path, "Files")
-				os.mkdir(file_path)
-
-				file_path = os.path.join(new_folder_path, "Scenes")
-				os.mkdir(file_path)
-				actualfile = os.path.join(file_path, "DefaultScene.txt")
-				with open(actualfile, 'w') as f:
-					f.write('')
-
-				folder = os.path.join(file_path, "DefaultScene")
-				os.mkdir(folder)
-				actualfile = os.path.join(folder, "Camera2D.config")
-				cameraconfig = ["#TRANSFORM","0","0","#BGCOLOR","#ffffff"]
-				with open(actualfile, 'w') as f:
-					for strings in cameraconfig:
-						f.write(strings+"\n")
-
-				loe = len(registered_projects_temp)
-				currentindex = 0
-				for elements in registered_projects_temp:
-					if currentindex == (loe-1):
-						fileopen_privat.writelines(elements+'\n')
-					else:
-						fileopen_privat.writelines(elements)
-					currentindex += 1
-				fileopen_privat.close()
-				final = ""
-				rendered_projects = []
-				projects_initialized = []
-				initialize_projects()
-				print(projects_initialized)
-				add_prc_to_render(last_pos)
+			renderit = True
 	
 
+	if create == True:
+		create = False
+		renderit = False
+		registered_projects_temp = []
+		fileopen = open('registered_projects.info','r')
+		fileread = fileopen.readlines()
+		for lines in fileread:
+			registered_projects_temp.append(lines.rstrip("\n"))
+		fileopen.close()
+		final = new_project_box.get_value()
+		if final != "" and final not in registered_projects_temp:
+			renderit = True
+			fileopen_privat = open('registered_projects.info','w')
+			fileopen_privat.writelines(final+'\n')
+
+			current_dir = os.getcwd()
+			projects_path = os.path.join(current_dir, "projects")
+			new_folder_path = os.path.join(projects_path, final)
+			os.mkdir(new_folder_path)
+			file_path = os.path.join(new_folder_path, "project.artix")
+			with open(file_path, 'w') as f:
+				f.write('never')
+
+			file_path = os.path.join(new_folder_path, "files.txt")
+			with open(file_path, 'w') as f:
+				f.write('')
+
+			file_path = os.path.join(new_folder_path, "scenes.txt")
+			with open(file_path, 'w') as f:
+				f.write('DefaultScene')
+
+			file_path = os.path.join(new_folder_path, "Files")
+			os.mkdir(file_path)
+
+			file_path = os.path.join(new_folder_path, "Scenes")
+			os.mkdir(file_path)
+			actualfile = os.path.join(file_path, "DefaultScene.txt")
+			with open(actualfile, 'w') as f:
+				f.write('')
+
+			folder = os.path.join(file_path, "DefaultScene")
+			os.mkdir(folder)
+			actualfile = os.path.join(folder, "Camera2D.config")
+			cameraconfig = ["#TRANSFORM","0","0","#BGCOLOR","#ffffff"]
+			with open(actualfile, 'w') as f:
+				for strings in cameraconfig:
+					f.write(strings+"\n")
+
+			loe = len(registered_projects_temp)
+			currentindex = 0
+			for elements in registered_projects_temp:
+				if currentindex == (loe-1):
+					fileopen_privat.writelines(elements+'\n')
+				else:
+					fileopen_privat.writelines(elements)
+				currentindex += 1
+			fileopen_privat.close()
+			final = ""
+			rendered_projects = []
+			projects_initialized = []
+			initialize_projects()
+			print(projects_initialized)
+			add_prc_to_render(last_pos)
+	
+	if renderit == True:
+		new_project_box.render(screen,(1000,700))
 	pygame.display.update()
 	clock.tick(60)
 
