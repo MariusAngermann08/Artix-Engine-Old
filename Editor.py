@@ -181,8 +181,9 @@ class ScreenRes(object):
     def _osx_get_modes():
         raise NotImplementedError()
 
-default_screen_res = ScreenRes.get()
-ScreenRes.set(1920, 1080)
+if plattform == "win":
+	default_screen_res = ScreenRes.get()
+	ScreenRes.set(1920, 1080)
 
 
 #default costumtkinter setup
@@ -2067,10 +2068,11 @@ scenetree.select(scenetree.displayed_objects[0])
 viewport.update()
 
 def on_closing():
-    if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
-        ScreenRes.set(default_screen_res[0],default_screen_res[1])
-        app.destroy()
-        sys.exit()
+	if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
+		if plattform == "win":
+			ScreenRes.set(default_screen_res[0],default_screen_res[1])
+		app.destroy()
+		sys.exit()
 
 app.wm_protocol("WM_DELETE_WINDOW", on_closing)
 
